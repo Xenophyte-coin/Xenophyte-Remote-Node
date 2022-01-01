@@ -16,13 +16,13 @@ namespace Xenophyte_RemoteNode.RemoteNode
 {
     public class ClassRemoteNodeSave
     {
-        private static readonly string BlockchainTransactonDatabase = "transaction.xerodb";
-        private static readonly string BlockchainBlockDatabase = "block.xerodb";
+        private static readonly string BlockchainTransactonDatabase = "transaction.xenodb";
+        private static readonly string BlockchainBlockDatabase = "block.xenodb";
         private static readonly string BlockchainDirectory = "\\Blockchain\\";
         private static readonly string BlockchainTransactionDirectory = "\\Blockchain\\Transaction\\";
         private static readonly string BlockchainBlockDirectory = "\\Blockchain\\Block\\";
         private static readonly string BlockchainWalletCacheDirectory = "\\Blockchain\\Wallet\\";
-        private static readonly string BlockchainWalletCacheDatabase = "wallet-cache.xerodb";
+        private static readonly string BlockchainWalletCacheDatabase = "wallet-cache.xenodb";
 
         private static StreamWriter _blockchainTransactionWriter;
         private static StreamWriter _blockchainBlockWriter;
