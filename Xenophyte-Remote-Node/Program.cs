@@ -443,13 +443,9 @@ namespace Xenophyte_RemoteNode
             }
 
             if (EnableApiHttp)
-            {
                 RemoteNodeSettingObject.enable_api_http = true;
-            }
             else
-            {
                 RemoteNodeSettingObject.enable_api_http = false;
-            }
 
             var jsonRemoteNodeSettingObject = JsonConvert.SerializeObject(RemoteNodeSettingObject, Formatting.Indented);
             using (StreamWriter writer =
@@ -601,11 +597,7 @@ namespace Xenophyte_RemoteNode
                         while ((line = reader.ReadLine()) != null)
                         {
                             if (!line.StartsWith("/"))
-                            {
-
                                 jsonSettingRemoteNodeObject += line;
-
-                            }
                         }
 
                         RemoteNodeSettingObject =
