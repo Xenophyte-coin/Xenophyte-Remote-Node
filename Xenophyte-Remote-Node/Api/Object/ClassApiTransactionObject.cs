@@ -10,5 +10,7 @@
         public long transaction_timestamp_sended;
         public string transaction_hash;
         public long transaction_timestamp_received;
+        public string transaction_wallet_address_sender;
+        public string transaction_wallet_address_receiver;
     }
 }

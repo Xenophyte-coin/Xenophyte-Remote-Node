@@ -531,7 +531,9 @@ namespace Xenophyte_RemoteNode.Api
                                         transaction_id_receiver = splitTransaction[3],
                                         transaction_timestamp_sended = long.Parse(splitTransaction[4]),
                                         transaction_hash = splitTransaction[5],
-                                        transaction_timestamp_received = long.Parse(splitTransaction[6])
+                                        transaction_timestamp_received = long.Parse(splitTransaction[6]),
+                                        transaction_wallet_address_sender = splitTransaction[8],
+                                        transaction_wallet_address_receiver = splitTransaction[9]
                                     };
                                     var jsonTransactionObject = JsonConvert.SerializeObject(transactionApiObject);
                                     await BuildAndSendHttpPacketAsync(jsonTransactionObject, false, null, true);
@@ -572,7 +574,9 @@ namespace Xenophyte_RemoteNode.Api
                                     transaction_id_receiver = splitTransaction[3],
                                     transaction_timestamp_sended = long.Parse(splitTransaction[4]),
                                     transaction_hash = splitTransaction[5],
-                                    transaction_timestamp_received = long.Parse(splitTransaction[6])
+                                    transaction_timestamp_received = long.Parse(splitTransaction[6]),
+                                    transaction_wallet_address_sender = splitTransaction[8],
+                                    transaction_wallet_address_receiver = splitTransaction[9]
                                 };
                                 var jsonTransactionObject = JsonConvert.SerializeObject(transactionApiObject);
                                 await BuildAndSendHttpPacketAsync(jsonTransactionObject, false, null, true);
