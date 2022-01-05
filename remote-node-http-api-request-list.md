@@ -213,8 +213,8 @@ Return a transaction information per a transaction id example: http://127.0.0.1:
 | transaction_timestamp_sended | long | Return the timestamp of sending of the transaction. |
 | transaction_hash | string | Return the transaction hash. |
 | transaction_timestamp_received | long | Return the timestamp of receive of the transaction. |
-| transaction_wallet_sender | long | Return the wallet address sender of the transaction. |
-| transaction_wallet_receiver | long | Return the wallet address receiver of the transaction. |
+| transaction_wallet_sender | string | Return the wallet address sender of the transaction. |
+| transaction_wallet_receiver | string | Return the wallet address receiver of the transaction. |
 
 
 **Note:**
@@ -243,8 +243,8 @@ Return a transaction information per a transaction hash example: http://127.0.0.
 | transaction_timestamp_sended | long | Return the timestamp of sending of the transaction. |
 | transaction_hash | string | Return the transaction hash. |
 | transaction_timestamp_received | long | Return the timestamp of receive of the transaction. |
-| transaction_wallet_sender | long | Return the wallet address sender of the transaction. |
-| transaction_wallet_receiver | long | Return the wallet address receiver of the transaction. |
+| transaction_wallet_sender | string | Return the wallet address sender of the transaction. |
+| transaction_wallet_receiver | string | Return the wallet address receiver of the transaction. |
 
 **Note:**
 
