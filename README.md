@@ -19,11 +19,11 @@ https://github.com/Xenophyte/Xenophyte-Remote-Node/wiki
 
 On Linux OS (Work also Raspbian OS for Raspberry):
 
-- sudo wget https://github.com/Xenophyte/Xenophyte-Remote-Node/releases/download/0.2.7.8R/Xenophyte-RemoteNode-0.3.0.3R-Linux-64bit.zip
+- sudo wget https://github.com/Xenophyte/Xenophyte-Remote-Node/releases/download/0.3.0.3R/Xenophyte-RemoteNode-0.3.0.3R-Linux-64bit.zip
 
 or:
 
-- sudo wget https://github.com/Xenophyte/Xenophyte-Remote-Node/releases/download/0.2.7.8R/Xenophyte-RemoteNode-0.3.0.3R-Raspberry.zip
+- sudo wget https://github.com/Xenophyte/Xenophyte-Remote-Node/releases/download/0.3.0.3R/Xenophyte-RemoteNode-0.3.0.3R-Raspberry.zip
 
 - sudo unzip Xenophyte-RemoteNode-0.3.0.3R-Linux.zip
 
