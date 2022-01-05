@@ -5,7 +5,7 @@
 
 <h4>Please check our wiki for get help about the remote node tool:</h4>
 
-https://github.com/Xenophyte/Xenophyte-Remote-Node/wiki
+https://github.com/Xenophyte-coin/Xenophyte-Remote-Node/wiki
 
 <h4>Supported Firewall on the API Ban system</h4>
 
