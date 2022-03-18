@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Xenophyte_RemoteNode.Object;
+using Xenophyte_RemoteNode.RemoteNode;
 
 namespace Xenophyte_RemoteNode.Data
 {
@@ -8,7 +9,7 @@ namespace Xenophyte_RemoteNode.Data
         /// <summary>
         /// Object of sync.
         /// </summary>
-        public static BigDictionaryTransaction ListOfTransaction = new BigDictionaryTransaction(); // List of transaction of the blockchain.
+        public static BigDictionaryTransaction ListOfTransaction; // List of transaction of the blockchain.
         public static BigDictionaryTransactionHash ListOfTransactionHash = new BigDictionaryTransactionHash(); // List of transaction hash of the blockchain.
         public static Dictionary<long, string> ListOfBlock = new Dictionary<long, string>(); // List of block mined of the blockchain.
         public static DictionaryBlockHash ListOfBlockHash = new DictionaryBlockHash(); // List of block mined hash of the blockchain.

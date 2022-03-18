@@ -520,23 +520,32 @@ namespace Xenophyte_RemoteNode.Api
                             {
                                 if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(selectedIndex))
                                 {
-                                    var splitTransaction = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(selectedIndex).Item1.Split(new[] { "-" }, StringSplitOptions.None);
 
-                                    var transactionApiObject = new ClassApiTransactionObject
+                                    var transactionObject = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(selectedIndex, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(selectedIndex), CancellationTokenSourceApi);
+
+  
+                                    if (!transactionObject.IsEmpty)
                                     {
-                                        transaction_id = (selectedIndex + 1),
-                                        transaction_id_sender = splitTransaction[0],
-                                        transaction_fake_amount = decimal.Parse(splitTransaction[1].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
-                                        transaction_fake_fee = decimal.Parse(splitTransaction[2].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
-                                        transaction_id_receiver = splitTransaction[3],
-                                        transaction_timestamp_sended = long.Parse(splitTransaction[4]),
-                                        transaction_hash = splitTransaction[5],
-                                        transaction_timestamp_received = long.Parse(splitTransaction[6]),
-                                        transaction_wallet_address_sender = splitTransaction[8],
-                                        transaction_wallet_address_receiver = splitTransaction[9]
-                                    };
-                                    var jsonTransactionObject = JsonConvert.SerializeObject(transactionApiObject);
-                                    await BuildAndSendHttpPacketAsync(jsonTransactionObject, false, null, true);
+                                        var splitTransaction = transactionObject.TransactionData.Split(new[] { "-" }, StringSplitOptions.None);
+
+                                        var transactionApiObject = new ClassApiTransactionObject
+                                        {
+                                            transaction_id = (selectedIndex + 1),
+                                            transaction_id_sender = splitTransaction[0],
+                                            transaction_fake_amount = decimal.Parse(splitTransaction[1].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
+                                            transaction_fake_fee = decimal.Parse(splitTransaction[2].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
+                                            transaction_id_receiver = splitTransaction[3],
+                                            transaction_timestamp_sended = long.Parse(splitTransaction[4]),
+                                            transaction_hash = splitTransaction[5],
+                                            transaction_timestamp_received = long.Parse(splitTransaction[6]),
+                                            transaction_wallet_address_sender = splitTransaction[8],
+                                            transaction_wallet_address_receiver = splitTransaction[9]
+                                        };
+                                        var jsonTransactionObject = JsonConvert.SerializeObject(transactionApiObject);
+                                        await BuildAndSendHttpPacketAsync(jsonTransactionObject, false, null, true);
+                                    }
+                                    else
+                                        await BuildAndSendHttpPacketAsync(ClassApiHttpRequestEnumeration.PacketNotExist);
 
                                 }
                                 else
@@ -563,23 +572,31 @@ namespace Xenophyte_RemoteNode.Api
                             long transactionIndex = ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(selectedHash);
                             if (transactionIndex != -1)
                             {
-                                var splitTransaction = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionIndex).Item1.Split(new[] { "-" }, StringSplitOptions.None);
 
-                                var transactionApiObject = new ClassApiTransactionObject
+                                var transactionObject = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(selectedIndex, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(selectedIndex), CancellationTokenSourceApi);
+
+                                if (!transactionObject.IsEmpty)
                                 {
-                                    transaction_id = (transactionIndex + 1),
-                                    transaction_id_sender = splitTransaction[0],
-                                    transaction_fake_amount = decimal.Parse(splitTransaction[1].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
-                                    transaction_fake_fee = decimal.Parse(splitTransaction[2].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
-                                    transaction_id_receiver = splitTransaction[3],
-                                    transaction_timestamp_sended = long.Parse(splitTransaction[4]),
-                                    transaction_hash = splitTransaction[5],
-                                    transaction_timestamp_received = long.Parse(splitTransaction[6]),
-                                    transaction_wallet_address_sender = splitTransaction[8],
-                                    transaction_wallet_address_receiver = splitTransaction[9]
-                                };
-                                var jsonTransactionObject = JsonConvert.SerializeObject(transactionApiObject);
-                                await BuildAndSendHttpPacketAsync(jsonTransactionObject, false, null, true);
+                                    var splitTransaction = transactionObject.TransactionData.Split(new[] { "-" }, StringSplitOptions.None);
+
+                                    var transactionApiObject = new ClassApiTransactionObject
+                                    {
+                                        transaction_id = (transactionIndex + 1),
+                                        transaction_id_sender = splitTransaction[0],
+                                        transaction_fake_amount = decimal.Parse(splitTransaction[1].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
+                                        transaction_fake_fee = decimal.Parse(splitTransaction[2].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
+                                        transaction_id_receiver = splitTransaction[3],
+                                        transaction_timestamp_sended = long.Parse(splitTransaction[4]),
+                                        transaction_hash = splitTransaction[5],
+                                        transaction_timestamp_received = long.Parse(splitTransaction[6]),
+                                        transaction_wallet_address_sender = splitTransaction[8],
+                                        transaction_wallet_address_receiver = splitTransaction[9]
+                                    };
+                                    var jsonTransactionObject = JsonConvert.SerializeObject(transactionApiObject);
+                                    await BuildAndSendHttpPacketAsync(jsonTransactionObject, false, null, true);
+                                }
+                                else
+                                    await BuildAndSendHttpPacketAsync(ClassApiHttpRequestEnumeration.PacketNotExist);
                             }
                             else
                             {

@@ -70,6 +70,7 @@
     <Compile Include="Object\BigDictionaryTransactionHash.cs" />
     <Compile Include="Object\BigDictionaryTransactionSortedPerWallet.cs" />
     <Compile Include="Object\DictionaryBlockHash.cs" />
+    <Compile Include="Object\Sub\TransactionObject.cs" />
     <Compile Include="RemoteNode\ClassCheckRemoteNodeSync.cs" />
     <Compile Include="Command\ClassCommandLine.cs" />
     <Compile Include="Log\ClassLog.cs" />
