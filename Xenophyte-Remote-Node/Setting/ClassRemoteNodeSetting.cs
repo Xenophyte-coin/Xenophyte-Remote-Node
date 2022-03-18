@@ -12,7 +12,7 @@
         public string chain_filtering_system;
         public string name_filtering_system;
         public bool enable_save_sync_raw = true;
-        public bool enable_disk_cache_mode = true;
+        public bool enable_disk_cache_mode = false;
         public int max_delay_transaction_memory = 3600;
         public long max_keep_alive_transaction_memory = 1_000_000;
     }
