@@ -570,7 +570,7 @@ namespace Xenophyte_RemoteNode.Api
                         if (selectedHash != string.Empty)
                         {
                             long transactionIndex = ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(selectedHash);
-                            if (transactionIndex != -1)
+                            if (transactionIndex >= 0)
                             {
 
                                 var transactionObject = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(selectedIndex, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(selectedIndex), CancellationTokenSourceApi);
