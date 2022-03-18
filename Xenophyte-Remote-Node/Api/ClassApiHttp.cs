@@ -569,11 +569,11 @@ namespace Xenophyte_RemoteNode.Api
                     case ClassApiHttpRequestEnumeration.GetCoinTransactionPerHash:
                         if (selectedHash != string.Empty)
                         {
-                            long transactionIndex = ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(selectedHash);
+                            long transactionIndex = ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(selectedHash) - 1;
                             if (transactionIndex >= 0)
                             {
 
-                                var transactionObject = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(selectedIndex, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(selectedIndex), CancellationTokenSourceApi);
+                                var transactionObject = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionIndex, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(selectedIndex), CancellationTokenSourceApi);
 
                                 if (!transactionObject.IsEmpty)
                                 {

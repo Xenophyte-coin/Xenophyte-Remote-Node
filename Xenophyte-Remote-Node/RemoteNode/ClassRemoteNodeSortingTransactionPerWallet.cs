@@ -66,7 +66,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                     if (ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(hashTransaction) == -1)
                     {
 
-                        if (ClassRemoteNodeSync.ListOfTransactionHash.InsertTransactionHash(idTransaction, hashTransaction))
+                        if (ClassRemoteNodeSync.ListOfTransactionHash.InsertTransactionHash(idTransaction+1, hashTransaction))
                         {
 
 
