@@ -325,7 +325,7 @@ namespace Xenophyte_RemoteNode.Object
         /// Open the transaction reader.
         /// </summary>
         /// <param name="cancellation"></param>
-        public void OpenTransactionReader(CancellationTokenSource cancellation)
+        public void OpenTransactionReader(CancellationTokenSource cancellation, bool semaphoreAlreadyUsed = false)
         {
             bool semaphoreUsed = false;
 
@@ -334,8 +334,12 @@ namespace Xenophyte_RemoteNode.Object
 
                 try
                 {
-                    SemaphoreSlimTransactionReader.Wait(cancellation.Token);
-                    semaphoreUsed = true;
+                    if (!semaphoreAlreadyUsed)
+                    {
+                        SemaphoreSlimTransactionReader.Wait(cancellation.Token);
+                        semaphoreUsed = true;
+                    }
+
                     if (!_readerOpened)
                     {
                         try
@@ -745,78 +749,66 @@ namespace Xenophyte_RemoteNode.Object
 
             string transactionResult = string.Empty;
 
-            bool useSemaphore = false;
 
             try
             {
-                try
+
+
+
+                _transactionReader.BaseStream.Seek(0, SeekOrigin.Begin);
+
+                string line;
+
+                long totalReadLine = 0;
+
+                while ((line = _transactionReader.ReadLine()) != null)
                 {
-                    if (!_readerOpened)
-                       OpenTransactionReader(cancellation);
+                    if (totalReadLine > id)
+                        break;
 
-                    SemaphoreSlimTransactionReader.Wait(cancellation.Token);
-                    useSemaphore = true;
-                    
-
-                    _transactionReader.BaseStream.Seek(0, SeekOrigin.Begin);
-
-                    string line;
-
-                    long totalReadLine = 0;
-
-                    while ((line = _transactionReader.ReadLine()) != null)
+                    if (totalReadLine == id)
                     {
-                        if (totalReadLine > id)
-                            break;
-
-                        if (totalReadLine == id)
+                        if (!string.IsNullOrEmpty(line))
                         {
-                            if (!string.IsNullOrEmpty(line))
+                            if (Program.RemoteNodeSettingObject.enable_save_sync_raw)
                             {
-                                if (Program.RemoteNodeSettingObject.enable_save_sync_raw)
+                                if (!line.Contains("%"))
+                                    break;
+
+                                var splitTransactionLine = line.Split(new[] { "%" }, StringSplitOptions.None);
+                                long transactionId = long.Parse(splitTransactionLine[0]);
+                                if (transactionId == id)
                                 {
-                                    if (!line.Contains("%"))
-                                        break;
+                                    transactionResult = splitTransactionLine[1];
 
-                                    var splitTransactionLine = line.Split(new[] { "%" }, StringSplitOptions.None);
-                                    long transactionId = long.Parse(splitTransactionLine[0]);
-                                    if (transactionId == id)
-                                    {
-                                        transactionResult = splitTransactionLine[1];
-
-                                        break;
-                                    }
-
+                                    break;
                                 }
-                                else
-                                {
-                                    var transactionObject = JsonConvert.DeserializeObject<ClassTransactionObject>(line);
 
-                                    if (transactionObject.transaction_id == id)
-                                    {
-                                        transactionResult = ClassTransactionUtility.BuildTransactionRaw(transactionObject);
-                                        break;
-                                    }
+                            }
+                            else
+                            {
+                                var transactionObject = JsonConvert.DeserializeObject<ClassTransactionObject>(line);
+
+                                if (transactionObject.transaction_id == id)
+                                {
+                                    transactionResult = ClassTransactionUtility.BuildTransactionRaw(transactionObject);
+                                    break;
                                 }
                             }
                         }
-                        totalReadLine++;
                     }
+                    totalReadLine++;
                 }
-                catch
-                {
-                    // Ignored, catch the exception once the task is cancelled.
-                }
+
+
+
+
+                return transactionResult;
             }
-            finally
+            catch
             {
-                if (useSemaphore)
-                    SemaphoreSlimTransactionReader.Release();
+                return string.Empty;
             }
-
-
-
-            return transactionResult;
         }
 
         /// <summary>
@@ -835,20 +827,51 @@ namespace Xenophyte_RemoteNode.Object
             if (idDictionary < 0)
                 return new TransactionObject(-1, string.Empty);
 
+            bool readFromCache = false;
+            string transactionResult = string.Empty;
 
             if (_enableDiskCache && !fromMemory)
             {
+                
+                bool useSemaphore = false;
+
+                try
+                {
+                    try
+                    {
 
 
-                string transactionResult = GetTransactionFromFile(id, cancellation);
+                        SemaphoreSlimTransactionReader.Wait(cancellation.Token);
+                        useSemaphore = true;
 
-                if (!string.IsNullOrEmpty(transactionResult) && transactionResult?.Length > 0)
+                        if (!_readerOpened)
+                            OpenTransactionReader(cancellation, true);
+
+                        if (!ContainsMemory(id))
+                        {
+                            transactionResult = GetTransactionFromFile(id, cancellation);
+                            readFromCache = true;
+                        }
+                    }
+                    catch
+                    {
+                        // Ignored, the cancellation token can cancelled.
+                    }
+                }
+                finally
+                {
+                    if (useSemaphore)
+                        SemaphoreSlimTransactionReader.Release();
+                }
+
+                if (!string.IsNullOrEmpty(transactionResult) && transactionResult?.Length > 0 && readFromCache)
                 {
                     UpdateTransaction(id, transactionResult);
                     return new TransactionObject(id, transactionResult);
                 }
-
             }
+
+
 
             string result = string.Empty;
 
@@ -1160,11 +1183,12 @@ namespace Xenophyte_RemoteNode.Object
                 return new TransactionObject(id, result);
 
             // try again if the reading of the transaction has failed.
-            if (_enableDiskCache && !fromMemory && (string.IsNullOrEmpty(result) || result?.Length == 0))
+            if (_enableDiskCache && !fromMemory && string.IsNullOrEmpty(result))
                 return GetTransaction(id, fromMemory, cancellation);
 
             return new TransactionObject(id, result);
         }
+        
 
         /// <summary>
         /// Clear a transaction target.

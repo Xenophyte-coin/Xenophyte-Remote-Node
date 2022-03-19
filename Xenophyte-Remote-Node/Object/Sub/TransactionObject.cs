@@ -28,14 +28,14 @@ namespace Xenophyte_RemoteNode.Object.Sub
             }
             set
             {
-                if (!string.IsNullOrEmpty(value) && _transactionData?.Length > 0)
+                if (!string.IsNullOrEmpty(value))
                     LastGetTimestamp = ClassUtilsNode.GetCurrentTimestampInSecond();
 
                 _transactionData = value == null ?  string.Empty : value;
             } 
         }
 
-        public bool IsEmpty => string.IsNullOrEmpty(_transactionData) || _transactionData.Length == 0;
+        public bool IsEmpty => string.IsNullOrEmpty(_transactionData);
 
         public bool IsExpired(int delay) => !IsEmpty && LastGetTimestamp + delay < ClassUtilsNode.GetCurrentTimestampInSecond();
 
