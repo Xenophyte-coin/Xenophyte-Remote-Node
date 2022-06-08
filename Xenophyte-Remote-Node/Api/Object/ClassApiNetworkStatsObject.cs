@@ -9,6 +9,7 @@
         public decimal coin_total_fee;
         public decimal coin_total_mined;
         public long coin_blockchain_height;
+        public decimal coin_block_reward;
         public long coin_total_block_mined;
         public long coin_total_block_left;
         public decimal coin_network_difficulty;

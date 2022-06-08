@@ -624,6 +624,7 @@ namespace Xenophyte_RemoteNode.Api
                             coin_total_block_mined = ClassRemoteNodeSync.ListOfBlock.Count,
                             coin_blockchain_height = (ClassRemoteNodeSync.ListOfBlock.Count + 1),
                             coin_total_block_left = long.Parse(ClassRemoteNodeSync.CurrentBlockLeft),
+                            coin_block_reward = ClassConnectorSetting.ConstantBlockReward,
                             coin_network_difficulty = decimal.Parse(ClassRemoteNodeSync.CurrentDifficulty.Replace(".", ","), NumberStyles.Any, Program.GlobalCultureInfo),
                             coin_network_hashrate = decimal.Parse(ClassRemoteNodeSync.CurrentHashrate.Replace(".", ","), NumberStyles.Any, Program.GlobalCultureInfo),
                             coin_total_transaction = ClassRemoteNodeSync.ListOfTransaction.Count

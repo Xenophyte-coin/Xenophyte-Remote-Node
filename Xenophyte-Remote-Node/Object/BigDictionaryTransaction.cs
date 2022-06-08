@@ -763,7 +763,7 @@ namespace Xenophyte_RemoteNode.Object
 
                 while ((line = _transactionReader.ReadLine()) != null)
                 {
-                    if (totalReadLine > id)
+                    if (totalReadLine > id || cancellation.IsCancellationRequested)
                         break;
 
                     if (totalReadLine == id)
