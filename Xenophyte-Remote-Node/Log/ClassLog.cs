@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using Xenophyte_Connector_All.Setting;
 using Xenophyte_RemoteNode.Utils;
 
 namespace Xenophyte_RemoteNode.Log
@@ -21,9 +20,9 @@ namespace Xenophyte_RemoteNode.Log
         /// <param name="message"></param>
         /// <param name="logLevel"></param>
         /// <param name="colorId"></param>
-        public static void Log(string message, int logLevel, int colorId, bool writeLog = false)
+        public static void Log(string message, int logLevel, int colorId)
         {
-            message = "<"+ClassConnectorSetting.CoinName+">[Log] - " + DateTime.Now + " | " + message;
+            message = "<Xenophyte>[Log] - " + DateTime.Now + " | " + message;
             if (logLevel == Program.LogLevel)
             {
                 switch (colorId)
@@ -45,7 +44,7 @@ namespace Xenophyte_RemoteNode.Log
                 Console.WriteLine(message);
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            if (Program.EnableWriteLog && writeLog)
+            if (Program.EnableWriteLog)
             {
                 InsertLog(message);
             }

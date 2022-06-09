@@ -12,7 +12,6 @@ using Xenophyte_RemoteNode.Api;
 using Xenophyte_RemoteNode.Command;
 using Xenophyte_RemoteNode.Data;
 using Xenophyte_RemoteNode.Log;
-using Xenophyte_RemoteNode.Object;
 using Xenophyte_RemoteNode.RemoteNode;
 using Xenophyte_RemoteNode.Setting;
 using Xenophyte_RemoteNode.Token;
@@ -177,11 +176,14 @@ namespace Xenophyte_RemoteNode
                     if (ReadConfigFile(true))
                     {
                         if (EnableWriteLog)
+                        {
                             ClassLog.EnableWriteLog();
-                        
+                        }
 
                         if (EnableFilteringSystem)
+                        {
                             ClassApiBan.FilterAutoCheckObject();
+                        }
                     }
                     else
                     {
@@ -189,7 +191,9 @@ namespace Xenophyte_RemoteNode
                             "Configuration file corrupted or invalid, do you want to setting up again your configuration? [Y/N]");
                         bool initialization = Console.ReadLine()?.ToLower() == "y";
                         if (initialization)
+                        {
                             FirstInitialization();
+                        }
                         else
                         {
                             Console.WriteLine("Close remote node tool.");
@@ -198,16 +202,14 @@ namespace Xenophyte_RemoteNode
                     }
                 }
                 else
+                {
                     FirstInitialization();
-                
+                }
             }
-
-            ClassRemoteNodeSync.ListOfTransaction = new BigDictionaryTransaction(RemoteNodeSettingObject.enable_disk_cache_mode,
-            ClassRemoteNodeSave.GetCurrentPath() + ClassRemoteNodeSave.GetBlockchainTransactionPath() + ClassRemoteNodeSave.BlockchainTransactionDatabase);
-
             if (ClassRemoteNodeSave.LoadBlockchainTransaction())
+            {
                 ClassRemoteNodeSave.LoadBlockchainBlock();
-            
+            }
 
             Console.WriteLine("Remote node Xenophyte - " + Assembly.GetExecutingAssembly().GetName().Version + "R");
 
@@ -432,9 +434,13 @@ namespace Xenophyte_RemoteNode
                 name_filtering_system = string.Empty
             };
             if (ClassRemoteNodeSync.WantToBePublicNode)
+            {
                 RemoteNodeSettingObject.enable_public_mode = true;
+            }
             else
+            {
                 RemoteNodeSettingObject.enable_public_mode = false;
+            }
 
             if (EnableApiHttp)
                 RemoteNodeSettingObject.enable_api_http = true;
@@ -635,10 +641,10 @@ namespace Xenophyte_RemoteNode
                         EnableFilteringSystem = RemoteNodeSettingObject.enable_filtering_system;
                         ClassApiBan.FilterChainName = RemoteNodeSettingObject.chain_filtering_system;
                         ClassApiBan.FilterSystem = RemoteNodeSettingObject.name_filtering_system;
-
                         if (wasWrongWalletAddress || NewConfigOptions(jsonSettingRemoteNodeObject))
+                        {
                             SaveConfigFile();
-                        
+                        }
                     }
                     else
                     {

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Xenophyte_RemoteNode.Object;
-using Xenophyte_RemoteNode.RemoteNode;
 
 namespace Xenophyte_RemoteNode.Data
 {
@@ -9,38 +8,21 @@ namespace Xenophyte_RemoteNode.Data
         /// <summary>
         /// Object of sync.
         /// </summary>
-        public static BigDictionaryTransaction ListOfTransaction; // List of transaction of the blockchain.
+        public static BigDictionaryTransaction ListOfTransaction = new BigDictionaryTransaction(); // List of transaction of the blockchain.
         public static BigDictionaryTransactionHash ListOfTransactionHash = new BigDictionaryTransactionHash(); // List of transaction hash of the blockchain.
         public static Dictionary<long, string> ListOfBlock = new Dictionary<long, string>(); // List of block mined of the blockchain.
         public static DictionaryBlockHash ListOfBlockHash = new DictionaryBlockHash(); // List of block mined hash of the blockchain.
         public static Dictionary<string, string> DictionaryCacheValidWalletAddress = new Dictionary<string, string>();
 
         public static string CoinMaxSupply; // Max Supply of the coin in the blockchain.
-        public static string PreviousCoinMaxSupply;
-
         public static string CoinCirculating; // Current amount of coin circulating in the blockchain.
-        public static string PreviousCoinCirculating;
-
         public static string CurrentTotalFee; // Current amount of fee in the blockchain.
-        public static string PreviousTotalFee;
-
         public static string CurrentHashrate; // Current Mining Power Calculation.
-        public static string PreviousCurrentHashrate;
-
         public static string CurrentDifficulty; // Current Mining Difficulty.
-        public static string PreviousCurrentDifficulty;
-
         public static string CurrentBlockLeft; // Current total of blocks left in the blockchain.
-        public static string PreviousBlockLeft;
-
         public static string TotalPendingTransaction; // Number of total transactions with status pending in the blockchain. 
-        public static string PreviousTotalPendingTransaction;
-
         public static string TotalBlockMined; // Number of total of blocks mined in the blockchain.
-        public static string PreviousTotalBlockMined;
-
         public static string TotalTransaction; // Number of total transaction in the blockchain.
-        public static string PreviousTotalTransaction;
 
 
         /// <summary>

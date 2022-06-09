@@ -16,8 +16,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
 {
     public class ClassRemoteNodeSave
     {
-        public static readonly string BlockchainTransactionDatabase = "transaction.xenodb";
-        public static readonly string BlockchainTransactionDatabaseBackup = "transaction-bak.xenodb";
+        private static readonly string BlockchainTransactonDatabase = "transaction.xenodb";
         private static readonly string BlockchainBlockDatabase = "block.xenodb";
         private static readonly string BlockchainDirectory = "\\Blockchain\\";
         private static readonly string BlockchainTransactionDirectory = "\\Blockchain\\Transaction\\";
@@ -64,7 +63,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
         ///     Get Current Path of the program.
         /// </summary>
         /// <returns></returns>
-        public static string GetCurrentPath()
+        private static string GetCurrentPath()
         {
             var path = AppDomain.CurrentDomain.BaseDirectory;
             if (Environment.OSVersion.Platform == PlatformID.Unix) path = path.Replace("\\", "/");
@@ -86,7 +85,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
         ///     Get blockchain path of transaction database.
         /// </summary>
         /// <returns></returns>
-        public static string GetBlockchainTransactionPath()
+        private static string GetBlockchainTransactionPath()
         {
             var path = BlockchainTransactionDirectory;
             if (Environment.OSVersion.Platform == PlatformID.Unix) path = path.Replace("\\", "/");
@@ -120,25 +119,26 @@ namespace Xenophyte_RemoteNode.RemoteNode
         /// </summary>
         public static bool LoadBlockchainTransaction()
         {
-            if (File.Exists(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabase))
+            if (File.Exists(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactonDatabase))
             {
                 if (Program.RemoteNodeSettingObject.enable_save_sync_raw)
+                {
                     Console.WriteLine("Load transaction database file - RAW data syntax enabled..");
+                }
                 else
+                {
                     Console.WriteLine("Load transaction database file - JSON Data syntax enabled..");
-                
+                }
                 long counter = 0;
                 try
                 {
-
                     bool error = false;
 
-                    using (FileStream fs = File.Open(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabase, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    using (FileStream fs = File.Open(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactonDatabase, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     using (BufferedStream bs = new BufferedStream(fs))
                     using (StreamReader sr = new StreamReader(bs))
                     {
                         string line;
-
                         while ((line = sr.ReadLine()) != null)
                         {
                             try
@@ -149,13 +149,9 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                     long transactionId = long.Parse(splitTransactionLine[0]);
                                     if (counter == transactionId)
                                     {
-
                                         if (ClassRemoteNodeSortingTransactionPerWallet.AddNewTransactionSortedPerWallet(splitTransactionLine[1], transactionId))
                                         {
-                                            if (Program.RemoteNodeSettingObject.enable_disk_cache_mode)
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionId, null);
-                                            else
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionId, splitTransactionLine[1]);
+                                            ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionId, splitTransactionLine[1]);
                                         }
                                     }
                                     else
@@ -172,10 +168,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                         string transactionRaw = ClassTransactionUtility.BuildTransactionRaw(transactionObject);
                                         if (ClassRemoteNodeSortingTransactionPerWallet.AddNewTransactionSortedPerWallet(transactionRaw, transactionObject.transaction_id))
                                         {
-                                            if (Program.RemoteNodeSettingObject.enable_disk_cache_mode)
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionObject.transaction_id, null);
-                                            else
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionObject.transaction_id, transactionRaw);
+                                            ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionObject.transaction_id, transactionRaw);
                                         }
                                     }
                                     else
@@ -215,7 +208,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
             }
             else
             {
-                File.Create(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabase).Close();
+                File.Create(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactonDatabase).Close();
             }
 
             ClassUtilsNode.ClearGc();
@@ -367,110 +360,61 @@ namespace Xenophyte_RemoteNode.RemoteNode
                         }
                     }
                     _cancellationTokenSaveTransaction = new CancellationTokenSource();
-
-                    long totalTransactionSaved = TotalTransactionSaved;
-
-
-                    #region Auto save transaction data.
-
                     try
                     {
                         Task.Factory.StartNew(async delegate
                         {
-                            if (!File.Exists(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabaseBackup))
-                            {
-                                File.Create(GetCurrentPath() + GetBlockchainTransactionPath() +
-                                            BlockchainTransactionDatabaseBackup).Close();
-                            }
-
-                            if (_blockchainTransactionWriter == null)
-                                _blockchainTransactionWriter = new StreamWriter(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabaseBackup, true, Encoding.UTF8, 8192) { AutoFlush = true };
-
-
                             while (!Program.Closed)
                             {
                                 try
                                 {
+                                    if (!File.Exists(GetCurrentPath() + GetBlockchainTransactionPath() +
+                                                     BlockchainTransactonDatabase))
+                                    {
+                                        File.Create(GetCurrentPath() + GetBlockchainTransactionPath() +
+                                                    BlockchainTransactonDatabase).Close();
+                                    }
+
+                                    if (_blockchainTransactionWriter == null)
+                                    {
+                                        _blockchainTransactionWriter = new StreamWriter(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactonDatabase, true, Encoding.UTF8, 8192) { AutoFlush = true };
+                                    }
 
                                     InSaveTransactionDatabase = true;
 
                                     if (ClassRemoteNodeSync.ListOfTransaction != null)
-                                    {
                                         if (ClassRemoteNodeSync.ListOfTransaction.Count > 0)
                                         {
                                             if (TotalTransactionSaved > ClassRemoteNodeSync.ListOfTransaction.Count)
+                                            {
                                                 ClearTransactionSyncSave();
+                                            }
                                             else
                                             {
-                                                bool changeDone = false;
-
                                                 if (TotalTransactionSaved < ClassRemoteNodeSync.ListOfTransaction.Count)
                                                 {
-
-                                                    for (long i = TotalTransactionSaved;
+                                                    for (var i = TotalTransactionSaved;
                                                         i < ClassRemoteNodeSync.ListOfTransaction.Count;
                                                         i++)
                                                     {
                                                         if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(i))
                                                         {
-                                                            var transactionObject = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(i, true, _cancellationTokenSaveTransaction);
-                                                            if (transactionObject.TransactionData == null)
-                                                                break;
-
-
+                                                            var transactionObject = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(i);
                                                             if (Program.RemoteNodeSettingObject.enable_save_sync_raw)
-                                                                _blockchainTransactionWriter.WriteLine(transactionObject.Id + "%" + transactionObject.TransactionData);
+                                                            {
+                                                                _blockchainTransactionWriter.WriteLine(transactionObject.Item2 + "%" + transactionObject.Item1);
+                                                            }
                                                             else
-                                                                _blockchainTransactionWriter.WriteLine(JsonConvert.SerializeObject(ClassTransactionUtility.BuildTransactionObjectFromRaw(transactionObject.Id, transactionObject.TransactionData), Formatting.None));
-
-                                                            ClassRemoteNodeSync.ListOfTransaction.ClearTransaction(i);
-
-                                                            totalTransactionSaved++;
-                                                            changeDone = true;
+                                                            {
+                                                                _blockchainTransactionWriter.WriteLine(JsonConvert.SerializeObject(ClassTransactionUtility.BuildTransactionObjectFromRaw(transactionObject.Item2, transactionObject.Item1), Formatting.None));
+                                                            }
                                                         }
                                                     }
 
-
-                                                    TotalTransactionSaved = totalTransactionSaved;
-
-                                                    if (changeDone)
-                                                    {
-                                                         ClassRemoteNodeSync.ListOfTransaction.CloseTransactionReader(_cancellationTokenSaveTransaction);
-
-                                                        bool useSemaphore = false;
-
-                                                        try
-                                                        {
-
-                                                            try
-                                                            {
-                                                                await ClassRemoteNodeSync.ListOfTransaction.SemaphoreSlimTransactionReader.WaitAsync(_cancellationTokenSaveTransaction.Token);
-                                                                useSemaphore = true;
-
-
-                                                                if (File.Exists(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabase))
-                                                                    File.Delete(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabase);
-
-                                                                File.Copy(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabaseBackup, GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabase);
-                                                            }
-                                                            catch
-                                                            {
-                                                                // Ignored, catch the exception once the task is cancelled.
-                                                            }
-                                                        }
-                                                        finally
-                                                        {
-                                                            if (useSemaphore)
-                                                                ClassRemoteNodeSync.ListOfTransaction.SemaphoreSlimTransactionReader.Release();
-                                                        }
-
-
-                                                         ClassRemoteNodeSync.ListOfTransaction.OpenTransactionReader(_cancellationTokenSaveTransaction);
-                                                    }
+                                                    TotalTransactionSaved = ClassRemoteNodeSync.ListOfTransaction.Count;
                                                 }
                                             }
                                         }
-                                    }
 
                                     InSaveTransactionDatabase = false;
                                 }
@@ -490,62 +434,6 @@ namespace Xenophyte_RemoteNode.RemoteNode
                     {
                         // Catch the exception once the task is cancelled.
                     }
-
-                    #endregion
-
-                    #region Auto clean up transaction data unused of the active memory.
-
-
-                    try
-                    {
-                        Task.Factory.StartNew(async () =>
-                        {
-                            while (!Program.Closed)
-                            {
-
-                                if (ClassRemoteNodeSync.ListOfTransaction.CountTransactionOnActiveMemory() >= Program.RemoteNodeSettingObject.max_keep_alive_transaction_memory)
-                                {
-
-                                    long currentTimestamp = ClassUtilsNode.GetCurrentTimestampInSecond();
-#if DEBUG
-                                    long totalCleanedUp = 0;
-#endif
-
-                                    for (long i = 0;
-                                        i < totalTransactionSaved;
-                                        i++)
-                                    {
-
-                                        if (ClassRemoteNodeSync.ListOfTransaction.TransactionExpired(i, Program.RemoteNodeSettingObject.max_delay_transaction_memory))
-                                        {
-                                            ClassRemoteNodeSync.ListOfTransaction.ClearTransaction(i);
-#if DEBUG
-                                            totalCleanedUp++;
-#endif
-
-                                        }
-
-                                    }
-
-
-#if DEBUG
-                                                if (totalCleanedUp > 0)
-                                                    Debug.WriteLine("Total tx cleaned up: " + totalCleanedUp);
-#endif
-
-                                    ClassUtilsNode.ClearGc();
-                                }
-
-                                await Task.Delay(Program.RemoteNodeSettingObject.max_delay_transaction_memory * 1000);
-                            }
-                        }, _cancellationTokenSaveTransaction.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
-                    }
-                    catch
-                    {
-                        // Catch the exception once the task is cancelled.
-                    }
-                    
-                    #endregion
                 }
                 else
                 {
@@ -554,70 +442,55 @@ namespace Xenophyte_RemoteNode.RemoteNode
                         try
                         {
                             if (!_cancellationTokenSaveTransaction.IsCancellationRequested)
+                            {
                                 _cancellationTokenSaveTransaction.Cancel();
+                            }
                         }
                         catch
                         {
                             // Ignored.
                         }
                     }
-
-
                     try
                     {
+                        if (_blockchainTransactionWriter != null)
+                        {
+                            ClearTransactionSyncSave();
+                        }
 
+                        File.Create(GetCurrentPath() + GetBlockchainTransactionPath() +  BlockchainTransactonDatabase).Close();
 
-                        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
                         if (!InSaveTransactionDatabase)
                         {
                             InSaveTransactionDatabase = true;
 
                             if (ClassRemoteNodeSync.ListOfTransaction != null)
-                            {
                                 if (ClassRemoteNodeSync.ListOfTransaction.Count > 0)
                                 {
 
 
-                                    for (long i = TotalTransactionSaved;
-                                        i < ClassRemoteNodeSync.ListOfTransaction.Count;
-                                        i++)
+                                    using (var sw = new StreamWriter(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactonDatabase, true, Encoding.UTF8, 8192) { AutoFlush = true })
                                     {
-                                        if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(i))
+                                        for (var i = 0; i < ClassRemoteNodeSync.ListOfTransaction.Count; i++)
                                         {
-                                            var transactionObject = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(i, true, _cancellationTokenSaveTransaction);
-                                            if (transactionObject.TransactionData == null)
-                                                break;
-
-
-                                            if (Program.RemoteNodeSettingObject.enable_save_sync_raw)
-                                                _blockchainTransactionWriter.WriteLine(transactionObject.Id + "%" + transactionObject.TransactionData);
-                                            else
-                                                _blockchainTransactionWriter.WriteLine(JsonConvert.SerializeObject(ClassTransactionUtility.BuildTransactionObjectFromRaw(transactionObject.Id, transactionObject.TransactionData), Formatting.None));
-
-                                            ClassRemoteNodeSync.ListOfTransaction.ClearTransaction(i);
-
+                                            if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(i))
+                                            {
+                                                var transactionObject = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(i);
+                                                if (Program.RemoteNodeSettingObject.enable_save_sync_raw)
+                                                {
+                                                    sw.WriteLine(transactionObject.Item2 + "%" + transactionObject.Item1);
+                                                }
+                                                else
+                                                {
+                                                    sw.WriteLine(JsonConvert.SerializeObject(ClassTransactionUtility.BuildTransactionObjectFromRaw(transactionObject.Item2, transactionObject.Item1), Formatting.None));
+                                                }
+                                            }
                                         }
                                     }
+
+                                    TotalTransactionSaved = ClassRemoteNodeSync.ListOfTransaction.Count;
                                 }
-                            }
-
-                            ClassRemoteNodeSync.ListOfTransaction.CloseTransactionReader(cancellationTokenSource);
-
-
-
-
-                            if (File.Exists(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabase))
-                                File.Delete(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabase);
-
-                            File.Copy(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabaseBackup, GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabase);
-
-
-                            if (_blockchainTransactionWriter != null)
-                                ClearTransactionSyncSave();
-
-                            if (File.Exists(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabaseBackup))
-                                File.Delete(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabaseBackup);
 
                             InSaveTransactionDatabase = false;
                         }
@@ -1004,7 +877,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
             {
                 TotalTransactionSaved = 0;
 
-                File.Create(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabase).Close();
+                File.Create(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactonDatabase).Close();
 
                 InSaveTransactionDatabase = false;
             }

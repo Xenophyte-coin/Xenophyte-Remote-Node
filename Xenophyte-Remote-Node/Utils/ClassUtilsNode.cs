@@ -7,10 +7,6 @@ namespace Xenophyte_RemoteNode.Utils
 {
     public class ClassUtilsNode
     {
-        public static long GetCurrentTimestampInSecond()
-        {
-           return DateTimeOffset.Now.ToUnixTimeSeconds();
-        }
 
         public static string ConvertPath(string path)
         {

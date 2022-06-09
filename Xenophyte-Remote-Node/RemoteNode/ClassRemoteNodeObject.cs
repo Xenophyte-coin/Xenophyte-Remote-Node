@@ -1000,17 +1000,14 @@ namespace Xenophyte_RemoteNode.RemoteNode
                     case ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTotalBlockMined: // Receive total block mined information.
                         RemoteNodeObjectLastPacketReceived = DateTimeOffset.Now.ToUnixTimeSeconds();
                         ClassRemoteNodeSync.TotalBlockMined = packetSplit[1];
-                        if (ClassRemoteNodeSync.CoinMaxSupply != null)
+                        if (int.TryParse(packetSplit[1], out var totalBlockMined))
                         {
-                            if (int.TryParse(packetSplit[1], out var totalBlockMined))
-                            {
-                                var totalBlockLeft =
-                                    Math.Round(
-                                        (decimal.Parse(ClassRemoteNodeSync.CoinMaxSupply.Replace(".", ","), System.Globalization.NumberStyles.Any,
-                                             Program.GlobalCultureInfo) / 10) - totalBlockMined, 0);
-                                ClassRemoteNodeSync.CurrentBlockLeft = "" + totalBlockLeft;
-                                ClassLog.Log("Total Block Left: " + ClassRemoteNodeSync.CurrentBlockLeft, 2, 2);
-                            }
+                            var totalBlockLeft =
+                                Math.Round(
+                                    (decimal.Parse(ClassRemoteNodeSync.CoinMaxSupply.Replace(".", ","), System.Globalization.NumberStyles.Any,
+                                         Program.GlobalCultureInfo) / 10) - totalBlockMined, 0);
+                            ClassRemoteNodeSync.CurrentBlockLeft = "" + totalBlockLeft;
+                            ClassLog.Log("Total Block Left: " + ClassRemoteNodeSync.CurrentBlockLeft, 2, 2);
                         }
 
                         ClassLog.Log("Total Block Mined: " + packetSplit[1], 2, 2);
@@ -1208,7 +1205,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                 if (!await RemoteNodeObjectTcpClient.SendPacketToSeedNodeAsync(
                                     ClassRemoteNodeCommand.ClassRemoteNodeSendToSeedEnumeration
                                         .RemoteCheckTransactionPerId + ClassConnectorSetting.PacketContentSeperator +
-                                    ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionId, false, CancellationRemoteNodeObject), Program.Certificate, false,
+                                    ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionId).Item1, Program.Certificate, false,
                                     true))
                                 {
                                     RemoteNodeObjectConnectionStatus = false;
