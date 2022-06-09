@@ -15,5 +15,6 @@
         public decimal coin_network_difficulty;
         public decimal coin_network_hashrate;
         public long coin_total_transaction;
+        public long coin_network_total_transaction;
     }
 }

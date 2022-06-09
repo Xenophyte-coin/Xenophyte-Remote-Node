@@ -627,7 +627,8 @@ namespace Xenophyte_RemoteNode.Api
                             coin_block_reward = ClassConnectorSetting.ConstantBlockReward,
                             coin_network_difficulty = decimal.Parse(ClassRemoteNodeSync.CurrentDifficulty.Replace(".", ","), NumberStyles.Any, Program.GlobalCultureInfo),
                             coin_network_hashrate = decimal.Parse(ClassRemoteNodeSync.CurrentHashrate.Replace(".", ","), NumberStyles.Any, Program.GlobalCultureInfo),
-                            coin_total_transaction = ClassRemoteNodeSync.ListOfTransaction.Count
+                            coin_total_transaction = ClassRemoteNodeSync.ListOfTransaction.Count,
+                            coin_network_total_transaction = long.Parse(ClassRemoteNodeSync.TotalTransaction)
                         };
 
                         var jsonNetworkStatsObject = JsonConvert.SerializeObject(networkStatsApiObject);
