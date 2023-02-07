@@ -53,7 +53,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
         public static void StartUpdateHashTransactionList()
         {
-
+            CancellationTokenSource cancellation = new CancellationTokenSource();
             if (!_inGenerateTransactionKey)
             {
                 _inGenerateTransactionKey = true;
@@ -73,9 +73,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                 if (long.TryParse(transaction, out var transactionId))
                                 {
                                     if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(transactionId))
-                                    {
-                                        transactionBlock += ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionId);
-                                    }
+                                        transactionBlock += ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionId, false, cancellation);
                                 }
                             }
                         }

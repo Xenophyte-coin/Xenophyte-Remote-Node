@@ -108,7 +108,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                 ClassRemoteNodeSync.MyOwnIP = string.Empty;
             }
             if (await RemoteNodeObjectTcpClient
-                .StartConnectToSeedAsync(string.Empty))
+                .StartConnectToSeedAsync(null))
             {
                 RemoteNodeObjectConnectionStatus = true;
                 RemoteNodeListenNetworkAsync();
@@ -1000,14 +1000,17 @@ namespace Xenophyte_RemoteNode.RemoteNode
                     case ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendTotalBlockMined: // Receive total block mined information.
                         RemoteNodeObjectLastPacketReceived = DateTimeOffset.Now.ToUnixTimeSeconds();
                         ClassRemoteNodeSync.TotalBlockMined = packetSplit[1];
-                        if (int.TryParse(packetSplit[1], out var totalBlockMined))
+                        if (ClassRemoteNodeSync.CoinMaxSupply != null)
                         {
-                            var totalBlockLeft =
-                                Math.Round(
-                                    (decimal.Parse(ClassRemoteNodeSync.CoinMaxSupply.Replace(".", ","), System.Globalization.NumberStyles.Any,
-                                         Program.GlobalCultureInfo) / 10) - totalBlockMined, 0);
-                            ClassRemoteNodeSync.CurrentBlockLeft = "" + totalBlockLeft;
-                            ClassLog.Log("Total Block Left: " + ClassRemoteNodeSync.CurrentBlockLeft, 2, 2);
+                            if (int.TryParse(packetSplit[1], out var totalBlockMined))
+                            {
+                                var totalBlockLeft =
+                                    Math.Round(
+                                        (decimal.Parse(ClassRemoteNodeSync.CoinMaxSupply.Replace(".", ","), System.Globalization.NumberStyles.Any,
+                                             Program.GlobalCultureInfo) / 10) - totalBlockMined, 0);
+                                ClassRemoteNodeSync.CurrentBlockLeft = "" + totalBlockLeft;
+                                ClassLog.Log("Total Block Left: " + ClassRemoteNodeSync.CurrentBlockLeft, 2, 2);
+                            }
                         }
 
                         ClassLog.Log("Total Block Mined: " + packetSplit[1], 2, 2);
@@ -1205,7 +1208,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                 if (!await RemoteNodeObjectTcpClient.SendPacketToSeedNodeAsync(
                                     ClassRemoteNodeCommand.ClassRemoteNodeSendToSeedEnumeration
                                         .RemoteCheckTransactionPerId + ClassConnectorSetting.PacketContentSeperator +
-                                    ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionId).Item1, Program.Certificate, false,
+                                    ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionId, false, CancellationRemoteNodeObject), Program.Certificate, false,
                                     true))
                                 {
                                     RemoteNodeObjectConnectionStatus = false;

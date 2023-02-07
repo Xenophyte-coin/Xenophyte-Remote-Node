@@ -20,7 +20,7 @@ namespace Xenophyte_RemoteNode.Token
         public const string PacketNotExist = "not_exist";
         public const string PacketResult = "result";
 
-        private static Dictionary<string, int> _listOfSeedNodesSpeed;
+        private static Dictionary<IPAddress, int> _listOfSeedNodesSpeed;
 
         /// <summary>
         /// Check if the wallet address exist on the network.
@@ -164,11 +164,11 @@ namespace Xenophyte_RemoteNode.Token
         /// Generate the list of seed nodes sorted by their ping time and return it.
         /// </summary>
         /// <returns></returns>
-        private static Dictionary<string, int> GetListOfSeedNodeSpeed()
+        private static Dictionary<IPAddress, int> GetListOfSeedNodeSpeed()
         {
             if (_listOfSeedNodesSpeed == null)
             {
-                _listOfSeedNodesSpeed = new Dictionary<string, int>();
+                _listOfSeedNodesSpeed = new Dictionary<IPAddress, int>();
             }
 
             if (_listOfSeedNodesSpeed.Count != ClassConnectorSetting.SeedNodeIp.Count)

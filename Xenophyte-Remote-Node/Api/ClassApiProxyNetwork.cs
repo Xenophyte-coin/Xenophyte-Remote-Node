@@ -87,7 +87,7 @@ namespace Xenophyte_RemoteNode.Api
                 ClassLog.Log("API Proxy - Attempt to connect wallet address: " + _walletAddress + " with certificate: " + _certificate, 5, 0);
 
                 _seedNodeConnector = new ClassSeedNodeConnector();
-                if (!await _seedNodeConnector.StartConnectToSeedAsync(string.Empty))
+                if (!await _seedNodeConnector.StartConnectToSeedAsync(null))
                 {
                     ConnectionAlive = false;
                     ClassLog.Log("API Proxy - Connection to the network unsuccessfully done for wallet address: " + _walletAddress, 5, 0);

@@ -161,15 +161,13 @@ namespace Xenophyte_RemoteNode.Command
                                     Console.WriteLine("IP: " + objectBan.Value.Ip + " Total Invalid Packet:" + objectBan.Value.TotalInvalidPacket + " banned pending: " + banDelay + " second(s).");
                                 }
                                 else
-                                {
                                     Console.WriteLine("IP: " + objectBan.Value.Ip + " Total Invalid Packet:" + objectBan.Value.TotalInvalidPacket + " not banned.");
-                                }
+                                
                             }
                         }
                         else
-                        {
                             Console.WriteLine("Their is any incoming ip on the list.");
-                        }
+                        
                         break;
                     case ClassCommandLineEnumeration.CommandLineBanList:
                         if (ClassApiBan.ListFilterObjects.Count > 0)
@@ -184,29 +182,25 @@ namespace Xenophyte_RemoteNode.Command
                             }
                         }
                         else
-                        {
                             Console.WriteLine("Their is any incoming ip on the list.");
-                        }
+                        
                         break;
                     case ClassCommandLineEnumeration.CommandLineSave:
                         Console.WriteLine("Starting save sync manually..");
                         while (ClassRemoteNodeSave.InSaveTransactionDatabase)
-                        {
                             Thread.Sleep(250);
-                        }
+                        
                         ClassRemoteNodeSave.TotalTransactionSaved = 0;
                         ClassRemoteNodeSave.SaveTransaction(false);
                         while (ClassRemoteNodeSave.InSaveBlockDatabase)
-                        {
                             Thread.Sleep(250);
-                        }
+                        
                         ClassRemoteNodeSave.TotalBlockSaved = 0;
                         ClassRemoteNodeSave.SaveBlock(false);
 
                         while (ClassRemoteNodeSave.InSaveWalletCacheDatabase)
-                        {
                             Thread.Sleep(1000);
-                        }
+                        
                         ClassRemoteNodeSave.TotalWalletCacheSaved = 0;
                         ClassRemoteNodeSave.SaveWalletCache(false);
                         Console.WriteLine("Sync saved.");
@@ -237,7 +231,6 @@ namespace Xenophyte_RemoteNode.Command
                         {
                             Thread.Sleep(1000);
                         }
-                        ClassRemoteNodeSave.TotalTransactionSaved = 0;
                         ClassRemoteNodeSave.SaveTransaction(false);
                         while (ClassRemoteNodeSave.InSaveBlockDatabase)
                         {

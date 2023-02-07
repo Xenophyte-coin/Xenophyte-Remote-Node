@@ -970,8 +970,8 @@ namespace Xenophyte_RemoteNode.Api
                                                             using (var apiTransaction = new ClassApiTransaction())
                                                             {
                                                                 string resultTransaction =
-                                                                    apiTransaction.GetTransactionFromWalletId(walletId,
-                                                                        idTransactionAskFromWallet);
+                                                                    await apiTransaction.GetTransactionFromWalletId(walletId,
+                                                                        idTransactionAskFromWallet, CancellationTokenApi);
                                                                 if (resultTransaction == "WRONG")
                                                                 {
                                                                     if (!await SendPacketAsync(
@@ -1056,8 +1056,8 @@ namespace Xenophyte_RemoteNode.Api
                                                             using (var apiTransaction = new ClassApiTransaction())
                                                             {
                                                                 string resultTransaction =
-                                                                    apiTransaction.GetTransactionFromWalletId(walletId,
-                                                                        idAnonymityTransactionAskFromWallet);
+                                                                    await apiTransaction.GetTransactionFromWalletId(walletId,
+                                                                        idAnonymityTransactionAskFromWallet, CancellationTokenApi);
                                                                 if (resultTransaction == "WRONG")
                                                                 {
                                                                     if (!await SendPacketAsync(
@@ -1117,7 +1117,7 @@ namespace Xenophyte_RemoteNode.Api
                                                                 .RemoteNodeRecvPacketEnumeration
                                                                 .SendRemoteNodeTransactionPerId + "|" +
                                                             ClassRemoteNodeSync.ListOfTransaction
-                                                                .GetTransaction(idTransactionAsk).Item1)
+                                                                .GetTransaction(idTransactionAsk, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(idTransactionAsk), CancellationTokenApi))
                                                         .ConfigureAwait(false))
                                                     {
                                                         IncomingConnectionStatus = false;
@@ -1144,12 +1144,13 @@ namespace Xenophyte_RemoteNode.Api
                                                 if (idTransactionAskTmp >= 0 && idTransactionAskTmp <
                                                     ClassRemoteNodeSync.ListOfTransaction.Count)
                                                 {
+                                                    var transactionData = await ClassRemoteNodeSync
+                                                            .ListOfTransaction.GetTransaction(idTransactionAskTmp, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(idTransactionAskTmp), CancellationTokenApi);
+
                                                     if (!await SendPacketAsync(
                                                         ClassRemoteNodeCommandForWallet.RemoteNodeRecvPacketEnumeration
                                                             .SendRemoteNodeAskTransactionHashPerId + "|" +
-                                                        ClassUtilsNode.ConvertStringToSha512(ClassRemoteNodeSync
-                                                            .ListOfTransaction.GetTransaction(idTransactionAskTmp)
-                                                            .Item1)).ConfigureAwait(false))
+                                                        ClassUtilsNode.ConvertStringToSha512(transactionData.TransactionData)).ConfigureAwait(false))
                                                     {
                                                         IncomingConnectionStatus = false;
                                                         return false;

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Xenophyte_RemoteNode.Data;
 using Xenophyte_RemoteNode.RemoteNode;
 
@@ -56,7 +58,7 @@ namespace Xenophyte_RemoteNode.Api
         /// <param name="walletId"></param>
         /// <param name="transactionId"></param>
         /// <returns></returns>
-        public string GetTransactionFromWalletId(float walletId, int transactionId)
+        public async Task<string> GetTransactionFromWalletId(float walletId, int transactionId, CancellationTokenSource cancellation)
         {
             TupleTransaction =
                 ClassRemoteNodeSync.ListTransactionPerWallet.GetTransactionPerId(walletId, transactionId);
@@ -66,7 +68,7 @@ namespace Xenophyte_RemoteNode.Api
 
                 if (getTransactionId != -1)
                 {
-                    Transaction = ClassRemoteNodeSync.ListOfTransaction.GetTransaction(getTransactionId).Item1;
+                    Transaction = (await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(getTransactionId, false, cancellation)).TransactionData;
                     if (Transaction != "WRONG")
                     {
                         var dataTransactionSplit = Transaction.Split(new[] {"-"}, StringSplitOptions.None);

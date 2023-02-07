@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using Xenophyte_RemoteNode.Data;
 using Xenophyte_RemoteNode.Log;
@@ -62,8 +63,9 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
 
                     string hashTransaction = dataTransactionSplit[5]; // Transaction hash.
-                    if (ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(hashTransaction) == -1)
+                    if (ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(hashTransaction) < 0)
                     {
+
                         if (ClassRemoteNodeSync.ListOfTransactionHash.InsertTransactionHash(idTransaction, hashTransaction))
                         {
 
@@ -71,7 +73,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                             bool testTx;
 
 
-                            #region test data of tx
+#region test data of tx
 
                             try
                             {
@@ -98,7 +100,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                 testTx = false;
                             }
 
-                            #endregion
+#endregion
 
                             if (testTx)
                             {
