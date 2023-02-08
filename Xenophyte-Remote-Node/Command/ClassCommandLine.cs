@@ -191,7 +191,7 @@ namespace Xenophyte_RemoteNode.Command
                             Thread.Sleep(250);
                         
                         ClassRemoteNodeSave.TotalTransactionSaved = 0;
-                        ClassRemoteNodeSave.SaveTransaction(false);
+                        await ClassRemoteNodeSave.SaveTransaction(false);
                         while (ClassRemoteNodeSave.InSaveBlockDatabase)
                             Thread.Sleep(250);
                         
@@ -231,7 +231,7 @@ namespace Xenophyte_RemoteNode.Command
                         {
                             Thread.Sleep(1000);
                         }
-                        ClassRemoteNodeSave.SaveTransaction(false);
+                        await ClassRemoteNodeSave .SaveTransaction(false);
                         while (ClassRemoteNodeSave.InSaveBlockDatabase)
                         {
                             Thread.Sleep(1000);

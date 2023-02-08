@@ -2,6 +2,9 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+#if DEBUG
+using System.Diagnostics;
+#endif
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -149,12 +152,11 @@ namespace Xenophyte_RemoteNode.Api
             _disposed = true;
         }
 
-        #endregion
+#endregion
 
         private bool _clientStatus;
         private TcpClient _client;
         private string _ip;
-        private SslStream _clientSslStream;
         private CancellationTokenSource CancellationTokenSourceApi;
 
         /// <summary>
@@ -295,6 +297,8 @@ namespace Xenophyte_RemoteNode.Api
         /// </summary>
         private void CloseClientConnection()
         {
+            _clientStatus = false;
+
             try
             {
                 _client?.Close();
@@ -307,9 +311,8 @@ namespace Xenophyte_RemoteNode.Api
             try
             {
                 if (!CancellationTokenSourceApi.IsCancellationRequested)
-                {
                     CancellationTokenSourceApi.Cancel();
-                }
+                
             }
             catch
             {
@@ -569,9 +572,17 @@ namespace Xenophyte_RemoteNode.Api
                     case ClassApiHttpRequestEnumeration.GetCoinTransactionPerHash:
                         if (selectedHash != string.Empty)
                         {
+
+#if DEBUG
+                            Debug.WriteLine("Search transaction by hash: "+selectedHash);
+#endif
+
                             long transactionIndex = ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(selectedHash);
                             if (transactionIndex >= 0)
                             {
+#if DEBUG
+                            Debug.WriteLine("Search transaction ID found: "+transactionIndex+" by hash: "+selectedHash);
+#endif
 
                                 var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionIndex, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(selectedIndex), CancellationTokenSourceApi);
 

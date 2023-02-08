@@ -1059,7 +1059,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                             {
                                                                 if (ClassRemoteNodeSortingTransactionPerWallet.AddNewTransactionSortedPerWallet(transactionSubSplit[1], transactionIdInsert))
                                                                 {
-                                                                    if (ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionIdInsert, transactionSubSplit[1]))
+                                                                    if (await ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionIdInsert, transactionSubSplit[1], 0, CancellationRemoteNodeObject))
                                                                     {
 
                                                                         if ((ClassRemoteNodeSync.ListOfTransaction.Count).ToString("F0") == ClassRemoteNodeSync.TotalTransaction)
@@ -1127,7 +1127,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                 if (ClassRemoteNodeSortingTransactionPerWallet.AddNewTransactionSortedPerWallet(transactionSubSplit[1], transactionIdInsert))
                                                 {
 
-                                                    if (ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionIdInsert, transactionSubSplit[1]))
+                                                    if (await ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionIdInsert, transactionSubSplit[1], 0, CancellationRemoteNodeObject))
                                                     {
                                                         if ((ClassRemoteNodeSync.ListOfTransaction.Count).ToString("F0") == ClassRemoteNodeSync.TotalTransaction)
                                                         {

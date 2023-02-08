@@ -118,7 +118,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
         /// <summary>
         ///     Load transaction(s) database file.
         /// </summary>
-        public static bool LoadBlockchainTransaction()
+        public static async Task<bool> LoadBlockchainTransaction(CancellationTokenSource cancellation)
         {
             if (File.Exists(GetCurrentPath() + GetBlockchainTransactionPath() + BlockchainTransactionDatabase))
             {
@@ -153,9 +153,9 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                         if (ClassRemoteNodeSortingTransactionPerWallet.AddNewTransactionSortedPerWallet(splitTransactionLine[1], transactionId))
                                         {
                                             if (Program.RemoteNodeSettingObject.enable_disk_cache_mode)
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionId, null);
+                                               await ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionId, null, sr.BaseStream.Position - line.Length, cancellation);
                                             else
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionId, splitTransactionLine[1]);
+                                               await ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionId, splitTransactionLine[1], sr.BaseStream.Position - line.Length, cancellation);
                                         }
                                     }
                                     else
@@ -173,9 +173,9 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                         if (ClassRemoteNodeSortingTransactionPerWallet.AddNewTransactionSortedPerWallet(transactionRaw, transactionObject.transaction_id))
                                         {
                                             if (Program.RemoteNodeSettingObject.enable_disk_cache_mode)
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionObject.transaction_id, null);
+                                                await ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionObject.transaction_id, null, sr.BaseStream.Position - line.Length, cancellation);
                                             else
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionObject.transaction_id, transactionRaw);
+                                                await ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionObject.transaction_id, transactionRaw, sr.BaseStream.Position - line.Length, cancellation);
                                         }
                                     }
                                     else

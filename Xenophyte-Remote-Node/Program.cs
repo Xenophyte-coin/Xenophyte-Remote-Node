@@ -109,9 +109,12 @@ namespace Xenophyte_RemoteNode
 
         public static ClassRemoteNodeSetting RemoteNodeSettingObject;
 
+        private static CancellationTokenSource _remoteCancellationTokenSource;
 
         public static void Main(string[] args)
         {
+
+            _remoteCancellationTokenSource = new CancellationTokenSource();
 
             AppDomain.CurrentDomain.UnhandledException += delegate(object sender, UnhandledExceptionEventArgs args2)
             {
@@ -129,7 +132,19 @@ namespace Xenophyte_RemoteNode
                                      Environment.NewLine);
                 }
 
+                try
+                {
+                    if (!_remoteCancellationTokenSource.IsCancellationRequested)
+                        _remoteCancellationTokenSource.Cancel();
+                }
+                catch
+                {
+                    // Ignored.
+                }
+
                 Trace.TraceError(exception.StackTrace);
+
+
 
                 Environment.Exit(1);
 
@@ -205,7 +220,7 @@ namespace Xenophyte_RemoteNode
             ClassRemoteNodeSync.ListOfTransaction = new BigDictionaryTransaction(RemoteNodeSettingObject.enable_disk_cache_mode,
             ClassRemoteNodeSave.GetCurrentPath() + ClassRemoteNodeSave.GetBlockchainTransactionPath() + ClassRemoteNodeSave.BlockchainTransactionDatabase);
 
-            if (ClassRemoteNodeSave.LoadBlockchainTransaction())
+            if (ClassRemoteNodeSave.LoadBlockchainTransaction(_remoteCancellationTokenSource).Result)
                 ClassRemoteNodeSave.LoadBlockchainBlock();
             
 
@@ -250,7 +265,7 @@ namespace Xenophyte_RemoteNode
                 ClassRemoteNodeKey.StartUpdateTrustedKey();
 
                 Console.WriteLine("Enable Auto save system..");
-                ClassRemoteNodeSave.SaveTransaction();
+                await ClassRemoteNodeSave.SaveTransaction();
                 ClassRemoteNodeSave.SaveBlock();
                 ClassRemoteNodeSave.SaveWalletCache();
 
