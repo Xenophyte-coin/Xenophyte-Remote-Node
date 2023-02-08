@@ -526,8 +526,10 @@ namespace Xenophyte_RemoteNode.Api
 
                                     var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(selectedIndex, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(selectedIndex), CancellationTokenSourceApi);
 
-  
-                                    if (!transactionObject.IsEmpty)
+
+                                    if (transactionObject == null || transactionObject.IsEmpty || string.IsNullOrEmpty(transactionObject.TransactionData))
+                                        await BuildAndSendHttpPacketAsync(ClassApiHttpRequestEnumeration.PacketNotExist);
+                                    else
                                     {
                                         var splitTransaction = transactionObject.TransactionData.Split(new[] { "-" }, StringSplitOptions.None);
 
@@ -546,10 +548,8 @@ namespace Xenophyte_RemoteNode.Api
                                         };
                                         var jsonTransactionObject = JsonConvert.SerializeObject(transactionApiObject);
                                         await BuildAndSendHttpPacketAsync(jsonTransactionObject, false, null, true);
-                                    }
-                                    else
-                                        await BuildAndSendHttpPacketAsync(ClassApiHttpRequestEnumeration.PacketNotExist);
 
+                                    }
                                 }
                                 else
                                 {
@@ -586,7 +586,11 @@ namespace Xenophyte_RemoteNode.Api
 
                                 var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionIndex, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(selectedIndex), CancellationTokenSourceApi);
 
-                                if (!transactionObject.IsEmpty)
+
+                                if (transactionObject == null || transactionObject.IsEmpty || string.IsNullOrEmpty(transactionObject.TransactionData))
+                                    await BuildAndSendHttpPacketAsync(ClassApiHttpRequestEnumeration.PacketNotExist);
+
+                                else
                                 {
                                     var splitTransaction = transactionObject.TransactionData.Split(new[] { "-" }, StringSplitOptions.None);
 
@@ -606,8 +610,7 @@ namespace Xenophyte_RemoteNode.Api
                                     var jsonTransactionObject = JsonConvert.SerializeObject(transactionApiObject);
                                     await BuildAndSendHttpPacketAsync(jsonTransactionObject, false, null, true);
                                 }
-                                else
-                                    await BuildAndSendHttpPacketAsync(ClassApiHttpRequestEnumeration.PacketNotExist);
+                               
                             }
                             else
                             {
