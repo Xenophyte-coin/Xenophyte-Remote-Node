@@ -795,59 +795,71 @@ namespace Xenophyte_RemoteNode.Object
 
                         if (!cancelRead)
                         {
-                            _transactionReader.BaseStream.Seek(_dictionaryStreamPosition.ContainsKey(id) ? _dictionaryStreamPosition[id] : 0, SeekOrigin.Begin);
 
-                            string line;
+                            bool useSeek = true;
 
-
-                            while ((line = _transactionReader.ReadLine()) != null)
+                            while (string.IsNullOrEmpty(transactionResult))
                             {
-                                if (!string.IsNullOrEmpty(line))
+
+                                if (useSeek)
                                 {
-                                    if (Program.RemoteNodeSettingObject.enable_save_sync_raw)
+                                    _transactionReader.BaseStream.Seek(
+                                        _dictionaryStreamPosition.ContainsKey(id) ?
+                                        _dictionaryStreamPosition[id] : 0, SeekOrigin.Begin);
+                                }
+                                else _transactionReader.BaseStream.Seek(0, SeekOrigin.Begin);
+
+                                string line;
+
+                                while ((line = await _transactionReader.ReadLineAsync()) != null)
+                                {
+                                    try
                                     {
-                                        if (!line.Contains("%"))
-                                            continue;
-
-                                        var splitTransactionLine = line.Split(new[] { "%" }, StringSplitOptions.None);
-                                        long transactionId = long.Parse(splitTransactionLine[0]);
-                                        if (transactionId == id)
+                                        if (Program.RemoteNodeSettingObject.enable_save_sync_raw)
                                         {
-                                            transactionResult = splitTransactionLine[1];
+                                            if (!line.Contains("%"))
+                                                continue;
 
-                                            if (!_dictionaryStreamPosition.ContainsKey(id))
-                                                _dictionaryStreamPosition.TryAdd(id, _transactionReader.BaseStream.Position - line.Length);
+                                            var splitTransactionLine = line.Split(new[] { "%" }, StringSplitOptions.None);
+                                            long transactionId = long.Parse(splitTransactionLine[0]);
+                                            if (transactionId == id)
+                                            {
+                                                transactionResult = splitTransactionLine[1];
 
-                                            break;
+                                                if (!_dictionaryStreamPosition.ContainsKey(id))
+                                                    _dictionaryStreamPosition.TryAdd(id, _transactionReader.BaseStream.Position - line.Length);
+                                                else _dictionaryStreamPosition[id] = _transactionReader.BaseStream.Position - line.Length;
+                                                
+                                                break;
+
+                                            }
+
                                         }
-                                        else if (transactionId > id)
+                                        else
                                         {
-                                            if (_dictionaryStreamPosition.ContainsKey(id))
-                                                _dictionaryStreamPosition.TryRemove(id, out _);
+                                            var transactionObject = JsonConvert.DeserializeObject<ClassTransactionObject>(line);
+
+                                            if (transactionObject.transaction_id == id)
+                                            {
+                                                transactionResult = ClassTransactionUtility.BuildTransactionRaw(transactionObject);
+
+                                                if (!_dictionaryStreamPosition.ContainsKey(id))
+                                                    _dictionaryStreamPosition.TryAdd(id, _transactionReader.BaseStream.Position - line.Length);
+                                                else _dictionaryStreamPosition[id] = _transactionReader.BaseStream.Position - line.Length;
+                                                break;
+                                            }
                                         }
                                     }
-                                    else
+                                    catch
                                     {
-                                        var transactionObject = JsonConvert.DeserializeObject<ClassTransactionObject>(line);
 
-                                        if (transactionObject.transaction_id == id)
-                                        {
-                                            transactionResult = ClassTransactionUtility.BuildTransactionRaw(transactionObject);
-
-                                            if (!_dictionaryStreamPosition.ContainsKey(id))
-                                                _dictionaryStreamPosition.TryAdd(id, _transactionReader.BaseStream.Position - line.Length);
-
-                                            break;
-                                        }
-                                        else if (transactionObject.transaction_id > id)
-                                        {
-                                            if (_dictionaryStreamPosition.ContainsKey(id))
-                                                _dictionaryStreamPosition.TryRemove(id, out _);
-                                            break;
-                                        }
+                                        // Ignored.
                                     }
+
                                 }
 
+
+                                await _transactionReader.BaseStream.FlushAsync(cancellation.Token);
                             }
                         }
                     }
@@ -873,7 +885,7 @@ namespace Xenophyte_RemoteNode.Object
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<TransactionObject> GetTransaction(long id, bool fromMemory, CancellationTokenSource cancellation)
+        public async Task<TransactionObject> GetTransaction(long id, CancellationTokenSource cancellation)
         {
             string result = string.Empty;
 
@@ -889,20 +901,7 @@ namespace Xenophyte_RemoteNode.Object
                     return new TransactionObject(-1, string.Empty);
 
 
-                if (_enableDiskCache && !fromMemory)
-                {
-
-
-                    string transactionResult = await GetTransactionFromFile(id, cancellation);
-
-                    if (!string.IsNullOrEmpty(transactionResult) && transactionResult?.Length > 0)
-                    {
-                        UpdateTransaction(id, transactionResult);
-                        return new TransactionObject(id, transactionResult);
-                    }
-
-                }
-
+                #region From active memory.
 
                 switch (idDictionary)
                 {
@@ -1208,12 +1207,33 @@ namespace Xenophyte_RemoteNode.Object
                         break;
                 }
 
+                #endregion
+
+                #region From disk cache.
+
+                if (_enableDiskCache)
+                {
+
+                    while (!cancellation.IsCancellationRequested)
+                    {
+                        string transactionResult = await GetTransactionFromFile(id, cancellation);
+
+                        if (!string.IsNullOrEmpty(transactionResult) && transactionResult.Length > 0)
+                        {
+                            UpdateTransaction(id, transactionResult);
+                            return new TransactionObject(id, transactionResult);
+                        }
+                    }
+                }
+
+                #endregion
+
                 if (cancellation.IsCancellationRequested)
                     return new TransactionObject(id, result);
 
                 // try again if the reading of the transaction has failed.
-                if (_enableDiskCache && !fromMemory && (string.IsNullOrEmpty(result) || result?.Length == 0))
-                    return await GetTransaction(id, fromMemory, cancellation);
+                if (_enableDiskCache && (!string.IsNullOrEmpty(result) || result?.Length > 0))
+                    UpdateTransaction(id, result);
             }
 #if DEBUG
             catch(Exception error)

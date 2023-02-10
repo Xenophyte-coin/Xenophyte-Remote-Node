@@ -1208,7 +1208,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                 if (!await RemoteNodeObjectTcpClient.SendPacketToSeedNodeAsync(
                                     ClassRemoteNodeCommand.ClassRemoteNodeSendToSeedEnumeration
                                         .RemoteCheckTransactionPerId + ClassConnectorSetting.PacketContentSeperator +
-                                    ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionId, false, CancellationRemoteNodeObject), Program.Certificate, false,
+                                    ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionId, CancellationRemoteNodeObject), Program.Certificate, false,
                                     true))
                                 {
                                     RemoteNodeObjectConnectionStatus = false;

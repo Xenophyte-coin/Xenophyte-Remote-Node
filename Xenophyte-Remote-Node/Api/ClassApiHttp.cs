@@ -518,43 +518,36 @@ namespace Xenophyte_RemoteNode.Api
                     case ClassApiHttpRequestEnumeration.GetCoinTransactionPerId:
                         if (selectedIndex > 0)
                         {
-                            selectedIndex -= 1;
-                            if (ClassRemoteNodeSync.ListOfTransaction.Count - 1 >= selectedIndex)
+                            selectedIndex--;
+
+                            if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(selectedIndex))
                             {
-                                if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(selectedIndex))
-                                {
 
-                                    var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(selectedIndex, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(selectedIndex), CancellationTokenSourceApi);
+                                var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(selectedIndex, CancellationTokenSourceApi);
 
 
-                                    if (transactionObject == null || transactionObject.IsEmpty || string.IsNullOrEmpty(transactionObject.TransactionData))
-                                        await BuildAndSendHttpPacketAsync(ClassApiHttpRequestEnumeration.PacketNotExist);
-                                    else
-                                    {
-                                        var splitTransaction = transactionObject.TransactionData.Split(new[] { "-" }, StringSplitOptions.None);
-
-                                        var transactionApiObject = new ClassApiTransactionObject
-                                        {
-                                            transaction_id = (selectedIndex + 1),
-                                            transaction_id_sender = splitTransaction[0],
-                                            transaction_fake_amount = decimal.Parse(splitTransaction[1].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
-                                            transaction_fake_fee = decimal.Parse(splitTransaction[2].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
-                                            transaction_id_receiver = splitTransaction[3],
-                                            transaction_timestamp_sended = long.Parse(splitTransaction[4]),
-                                            transaction_hash = splitTransaction[5],
-                                            transaction_timestamp_received = long.Parse(splitTransaction[6]),
-                                            transaction_wallet_address_sender = splitTransaction[8],
-                                            transaction_wallet_address_receiver = splitTransaction[9]
-                                        };
-                                        var jsonTransactionObject = JsonConvert.SerializeObject(transactionApiObject);
-                                        await BuildAndSendHttpPacketAsync(jsonTransactionObject, false, null, true);
-
-                                    }
-                                }
+                                if (transactionObject.IsEmpty)
+                                    await BuildAndSendHttpPacketAsync(ClassApiHttpRequestEnumeration.PacketNotExist);
                                 else
                                 {
-                                    ClassApiBan.FilterInsertInvalidPacket(_ip);
-                                    await BuildAndSendHttpPacketAsync(ClassApiHttpRequestEnumeration.PacketNotExist);
+                                    var splitTransaction = transactionObject.TransactionData.Split(new[] { "-" }, StringSplitOptions.None);
+
+                                    var transactionApiObject = new ClassApiTransactionObject
+                                    {
+                                        transaction_id = (selectedIndex + 1),
+                                        transaction_id_sender = splitTransaction[0],
+                                        transaction_fake_amount = decimal.Parse(splitTransaction[1].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
+                                        transaction_fake_fee = decimal.Parse(splitTransaction[2].Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
+                                        transaction_id_receiver = splitTransaction[3],
+                                        transaction_timestamp_sended = long.Parse(splitTransaction[4]),
+                                        transaction_hash = splitTransaction[5],
+                                        transaction_timestamp_received = long.Parse(splitTransaction[6]),
+                                        transaction_wallet_address_sender = splitTransaction[8],
+                                        transaction_wallet_address_receiver = splitTransaction[9]
+                                    };
+                                    var jsonTransactionObject = JsonConvert.SerializeObject(transactionApiObject);
+                                    await BuildAndSendHttpPacketAsync(jsonTransactionObject, false, null, true);
+
                                 }
                             }
                             else
@@ -562,6 +555,7 @@ namespace Xenophyte_RemoteNode.Api
                                 ClassApiBan.FilterInsertInvalidPacket(_ip);
                                 await BuildAndSendHttpPacketAsync(ClassApiHttpRequestEnumeration.PacketNotExist);
                             }
+
                         }
                         else
                         {
@@ -584,10 +578,10 @@ namespace Xenophyte_RemoteNode.Api
                             Debug.WriteLine("Search transaction ID found: "+transactionIndex+" by hash: "+selectedHash);
 #endif
 
-                                var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionIndex, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(selectedIndex), CancellationTokenSourceApi);
+                                var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionIndex, CancellationTokenSourceApi);
 
 
-                                if (transactionObject == null || transactionObject.IsEmpty || string.IsNullOrEmpty(transactionObject.TransactionData))
+                                if (transactionObject.IsEmpty)
                                     await BuildAndSendHttpPacketAsync(ClassApiHttpRequestEnumeration.PacketNotExist);
 
                                 else

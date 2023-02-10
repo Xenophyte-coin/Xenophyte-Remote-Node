@@ -413,7 +413,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                     {
                                                         if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(i))
                                                         {
-                                                            var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(i, true, _cancellationTokenSaveTransaction);
+                                                            var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(i, _cancellationTokenSaveTransaction);
                                                             if (transactionObject.TransactionData == null)
                                                                 break;
 
@@ -423,7 +423,10 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                             else
                                                                 _blockchainTransactionWriter.WriteLine(JsonConvert.SerializeObject(ClassTransactionUtility.BuildTransactionObjectFromRaw(transactionObject.Id, transactionObject.TransactionData), Formatting.None));
 
-                                                            ClassRemoteNodeSync.ListOfTransaction.ClearTransaction(i);
+
+                                                            if (ClassRemoteNodeSync.ListOfTransaction.TransactionExpired(i, Program.RemoteNodeSettingObject.max_delay_transaction_memory))
+                                                                ClassRemoteNodeSync.ListOfTransaction.ClearTransaction(i);
+                                                            
 
                                                             totalTransactionSaved++;
                                                             changeDone = true;
@@ -493,59 +496,6 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
                     #endregion
 
-                    #region Auto clean up transaction data unused of the active memory.
-
-
-                    try
-                    {
-                        await Task.Factory.StartNew(async () =>
-                        {
-                            while (!Program.Closed)
-                            {
-
-                                if (ClassRemoteNodeSync.ListOfTransaction.CountTransactionOnActiveMemory() >= Program.RemoteNodeSettingObject.max_keep_alive_transaction_memory)
-                                {
-
-                                    long currentTimestamp = ClassUtilsNode.GetCurrentTimestampInSecond();
-#if DEBUG
-                                    long totalCleanedUp = 0;
-#endif
-
-                                    for (long i = 0;
-                                        i < totalTransactionSaved;
-                                        i++)
-                                    {
-
-                                        if (ClassRemoteNodeSync.ListOfTransaction.TransactionExpired(i, Program.RemoteNodeSettingObject.max_delay_transaction_memory))
-                                        {
-                                            ClassRemoteNodeSync.ListOfTransaction.ClearTransaction(i);
-#if DEBUG
-                                            totalCleanedUp++;
-#endif
-
-                                        }
-
-                                    }
-
-
-#if DEBUG
-                                                if (totalCleanedUp > 0)
-                                                    Debug.WriteLine("Total tx cleaned up: " + totalCleanedUp);
-#endif
-
-                                    ClassUtilsNode.ClearGc();
-                                }
-
-                                await Task.Delay(Program.RemoteNodeSettingObject.max_delay_transaction_memory * 1000);
-                            }
-                        }, _cancellationTokenSaveTransaction.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
-                    }
-                    catch
-                    {
-                        // Catch the exception once the task is cancelled.
-                    }
-                    
-                    #endregion
                 }
                 else
                 {
@@ -585,7 +535,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                     {
                                         if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(i))
                                         {
-                                            var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(i, true, _cancellationTokenSaveTransaction);
+                                            var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(i, _cancellationTokenSaveTransaction);
                                             if (transactionObject.TransactionData == null)
                                                 break;
 

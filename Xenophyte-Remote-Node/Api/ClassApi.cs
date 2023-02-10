@@ -1112,13 +1112,23 @@ namespace Xenophyte_RemoteNode.Api
                                                 if (idTransactionAsk >= 0 && idTransactionAsk <
                                                     ClassRemoteNodeSync.ListOfTransaction.Count)
                                                 {
-                                                    if (!await SendPacketAsync(
-                                                            ClassRemoteNodeCommandForWallet
-                                                                .RemoteNodeRecvPacketEnumeration
-                                                                .SendRemoteNodeTransactionPerId + "|" +
-                                                            ClassRemoteNodeSync.ListOfTransaction
-                                                                .GetTransaction(idTransactionAsk, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(idTransactionAsk), CancellationTokenApi))
-                                                        .ConfigureAwait(false))
+
+                                                   var result = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(idTransactionAsk, CancellationTokenApi);
+
+                                                    if (result != null && !result.IsEmpty)
+                                                    {
+                                                        if (!await SendPacketAsync(
+                                                                ClassRemoteNodeCommandForWallet
+                                                                    .RemoteNodeRecvPacketEnumeration
+                                                                    .SendRemoteNodeTransactionPerId + "|" + result.TransactionData
+                                                               )
+                                                            .ConfigureAwait(false))
+                                                        {
+                                                            IncomingConnectionStatus = false;
+                                                            return false;
+                                                        }
+                                                    }
+                                                    else
                                                     {
                                                         IncomingConnectionStatus = false;
                                                         return false;
@@ -1145,7 +1155,7 @@ namespace Xenophyte_RemoteNode.Api
                                                     ClassRemoteNodeSync.ListOfTransaction.Count)
                                                 {
                                                     var transactionData = await ClassRemoteNodeSync
-                                                            .ListOfTransaction.GetTransaction(idTransactionAskTmp, ClassRemoteNodeSync.ListOfTransaction.ContainsMemory(idTransactionAskTmp), CancellationTokenApi);
+                                                            .ListOfTransaction.GetTransaction(idTransactionAskTmp, CancellationTokenApi);
 
                                                     if (!await SendPacketAsync(
                                                         ClassRemoteNodeCommandForWallet.RemoteNodeRecvPacketEnumeration

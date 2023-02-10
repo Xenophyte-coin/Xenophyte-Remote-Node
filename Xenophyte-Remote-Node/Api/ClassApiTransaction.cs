@@ -68,7 +68,7 @@ namespace Xenophyte_RemoteNode.Api
 
                 if (getTransactionId != -1)
                 {
-                    Transaction = (await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(getTransactionId, false, cancellation)).TransactionData;
+                    Transaction = (await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(getTransactionId, cancellation)).TransactionData;
                     if (Transaction != "WRONG")
                     {
                         var dataTransactionSplit = Transaction.Split(new[] {"-"}, StringSplitOptions.None);
