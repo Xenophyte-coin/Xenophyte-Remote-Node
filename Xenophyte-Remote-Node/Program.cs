@@ -220,7 +220,7 @@ namespace Xenophyte_RemoteNode
             ClassRemoteNodeSync.ListOfTransaction = new BigDictionaryTransaction(RemoteNodeSettingObject.enable_disk_cache_mode,
             ClassRemoteNodeSave.GetCurrentPath() + ClassRemoteNodeSave.GetBlockchainTransactionPath() + ClassRemoteNodeSave.BlockchainTransactionDatabase);
 
-            if (ClassRemoteNodeSave.LoadBlockchainTransaction(_remoteCancellationTokenSource).Result)
+            if (ClassRemoteNodeSave.LoadBlockchainTransaction(_remoteCancellationTokenSource))
                 ClassRemoteNodeSave.LoadBlockchainBlock();
             
 

@@ -187,7 +187,7 @@ namespace Xenophyte_RemoteNode.Object
         private Dictionary<long,TransactionObject> _bigDictionaryTransaction99; // 989 999 999 - 999 999 999
         private Dictionary<long,TransactionObject> _bigDictionaryTransaction100; // 999 999 999 - 1 009 999 999 ~39.620 GB
 
-        private ConcurrentDictionary<long, long> _dictionaryStreamPosition;
+        public ConcurrentDictionary<long, long> DictionaryStreamPosition;
 
         public const int MaxTransactionPerDictionary = 10000000; // 10 millions of transactions per dictionary
 
@@ -204,7 +204,7 @@ namespace Xenophyte_RemoteNode.Object
             _transactionPath = transactionPath;
             SemaphoreSlimTransactionReader = new SemaphoreSlim(1, 1);
 
-            _dictionaryStreamPosition = new ConcurrentDictionary<long, long>();
+            DictionaryStreamPosition = new ConcurrentDictionary<long, long>();
 
             #region Big transaction.
 
@@ -328,7 +328,7 @@ namespace Xenophyte_RemoteNode.Object
         /// Open the transaction reader.
         /// </summary>
         /// <param name="cancellation"></param>
-        public async Task OpenTransactionReader(CancellationTokenSource cancellation)
+        public async Task<bool> OpenTransactionReader(CancellationTokenSource cancellation)
         {
             bool semaphoreUsed = false;
 
@@ -339,21 +339,24 @@ namespace Xenophyte_RemoteNode.Object
                 {
                     await SemaphoreSlimTransactionReader.WaitAsync(cancellation.Token);
                     semaphoreUsed = true;
-                    if (!_readerOpened)
+                    if (_readerOpened)
                     {
                         try
                         {
                             _transactionReader.Close();
+                            _readerOpened = false;
                             //_transactionReader.Dispose();
                         }
                         catch
                         {
                             // Ignored.
                         }
+                    }
 
-                        _transactionReader = new StreamReader(_transactionPath, Encoding.UTF8, false);
+                    if (!_readerOpened)
+                    {
+                        _transactionReader = new StreamReader(_transactionPath, Encoding.UTF8, true);
                         _readerOpened = true;
-
                     }
                 }
                 catch
@@ -366,12 +369,13 @@ namespace Xenophyte_RemoteNode.Object
                 if (semaphoreUsed)
                     SemaphoreSlimTransactionReader.Release();
             }
+            return _readerOpened;
         }
 
         /// <summary>
         /// Close the transaction reader.
         /// </summary>
-        public async Task CloseTransactionReader(CancellationTokenSource cancellation)
+        public async Task<bool> CloseTransactionReader(CancellationTokenSource cancellation)
         {
             if (_enableDiskCache)
             {
@@ -388,12 +392,12 @@ namespace Xenophyte_RemoteNode.Object
                             try
                             {
                                 _transactionReader.Close();
+                                _readerOpened = false;
                             }
                             catch
                             {
                                 // Ignored.
                             }
-                            _readerOpened = false;
                         }
                     }
                     catch
@@ -407,6 +411,8 @@ namespace Xenophyte_RemoteNode.Object
                         SemaphoreSlimTransactionReader.Release();
                 }
             }
+
+            return _readerOpened;
         }
 
         /// <summary>
@@ -729,7 +735,17 @@ namespace Xenophyte_RemoteNode.Object
                             _bigDictionaryTransaction100.Add(id, new TransactionObject(id, transaction));
                             break;
                     }
+                
+                
+                    if (Program.RemoteNodeSettingObject.enable_disk_cache_mode)
+                    {
+                        if (!DictionaryStreamPosition.ContainsKey(id))
+                            DictionaryStreamPosition.TryAdd(id, position);
+                        
+                    }
                 }
+
+
             }
             catch
             {
@@ -759,8 +775,9 @@ namespace Xenophyte_RemoteNode.Object
             {
                 try
                 {
-                    if (!_readerOpened)
-                        await OpenTransactionReader(cancellation);
+
+                    if (!await OpenTransactionReader(cancellation))
+                        return string.Empty;
 
                     await SemaphoreSlimTransactionReader.WaitAsync(cancellation.Token);
                     useSemaphore = true;
@@ -770,9 +787,9 @@ namespace Xenophyte_RemoteNode.Object
 
                         bool cancelRead = false;
 
-                        if (_dictionaryStreamPosition.ContainsKey(id))
+                        if (DictionaryStreamPosition.ContainsKey(id))
                         {
-                            if (_dictionaryStreamPosition[id] == 0 && id > 0)
+                            if (DictionaryStreamPosition[id] == 0 && id > 0)
                                 cancelRead = true;
                         }
 
@@ -781,70 +798,75 @@ namespace Xenophyte_RemoteNode.Object
 
                             bool useSeek = true;
 
-                            while (string.IsNullOrEmpty(transactionResult))
+                            if (useSeek)
                             {
+                                _transactionReader.BaseStream.Seek(
+                                    DictionaryStreamPosition.ContainsKey(id) ?
+                                    DictionaryStreamPosition[id] : 0, SeekOrigin.Begin);
+                            }
+                            else _transactionReader.BaseStream.Seek(0, SeekOrigin.Begin);
 
-                                if (useSeek)
+                            long countSleep = DictionaryStreamPosition.Count;
+                            long countSleepDone = 0;
+
+                            string line;
+
+                            while ((line = _transactionReader.ReadLine()) != null)
+                            {
+                                try
                                 {
-                                    _transactionReader.BaseStream.Seek(
-                                        _dictionaryStreamPosition.ContainsKey(id) ?
-                                        _dictionaryStreamPosition[id] : 0, SeekOrigin.Begin);
-                                }
-                                else _transactionReader.BaseStream.Seek(0, SeekOrigin.Begin);
-
-                                string line;
-
-                                while ((line = await _transactionReader.ReadLineAsync()) != null)
-                                {
-                                    try
+                                    if (Program.RemoteNodeSettingObject.enable_save_sync_raw)
                                     {
-                                        if (Program.RemoteNodeSettingObject.enable_save_sync_raw)
+                                        if (!line.Contains("%"))
+                                            continue;
+
+
+                                        Debug.WriteLine(line + " search: " + id);
+
+                                        var splitTransactionLine = line.Split(new[] { "%" }, StringSplitOptions.None);
+                                        long transactionId = long.Parse(splitTransactionLine[0]);
+                                        if (transactionId == id)
                                         {
-                                            if (!line.Contains("%"))
-                                                continue;
+                                            transactionResult = splitTransactionLine[1];
 
-                                            var splitTransactionLine = line.Split(new[] { "%" }, StringSplitOptions.None);
-                                            long transactionId = long.Parse(splitTransactionLine[0]);
-                                            if (transactionId == id)
-                                            {
-                                                transactionResult = splitTransactionLine[1];
+                                            if (!DictionaryStreamPosition.ContainsKey(id))
+                                                DictionaryStreamPosition.TryAdd(id, _transactionReader.BaseStream.Position - line.Length);
+                                            else DictionaryStreamPosition[id] = _transactionReader.BaseStream.Position - line.Length;
 
-                                                if (!_dictionaryStreamPosition.ContainsKey(id))
-                                                    _dictionaryStreamPosition.TryAdd(id, _transactionReader.BaseStream.Position - line.Length);
-                                                else _dictionaryStreamPosition[id] = _transactionReader.BaseStream.Position - line.Length;
-                                                
-                                                break;
-
-                                            }
+                                            break;
 
                                         }
-                                        else
+
+                                    }
+                                    else
+                                    {
+                                        var transactionObject = JsonConvert.DeserializeObject<ClassTransactionObject>(line);
+
+                                        if (transactionObject.transaction_id == id)
                                         {
-                                            var transactionObject = JsonConvert.DeserializeObject<ClassTransactionObject>(line);
+                                            transactionResult = ClassTransactionUtility.BuildTransactionRaw(transactionObject);
 
-                                            if (transactionObject.transaction_id == id)
-                                            {
-                                                transactionResult = ClassTransactionUtility.BuildTransactionRaw(transactionObject);
-
-                                                if (!_dictionaryStreamPosition.ContainsKey(id))
-                                                    _dictionaryStreamPosition.TryAdd(id, _transactionReader.BaseStream.Position - line.Length);
-                                                else _dictionaryStreamPosition[id] = _transactionReader.BaseStream.Position - line.Length;
-                                                break;
-                                            }
+                                            if (!DictionaryStreamPosition.ContainsKey(id))
+                                                DictionaryStreamPosition.TryAdd(id, _transactionReader.BaseStream.Position - line.Length);
+                                            else DictionaryStreamPosition[id] = _transactionReader.BaseStream.Position - line.Length;
+                                            break;
                                         }
                                     }
-                                    catch
-                                    {
+                                }
+                                catch
+                                {
 
-                                        // Ignored.
-                                    }
-
+                                    // Ignored.
                                 }
 
-
-                                await _transactionReader.BaseStream.FlushAsync(cancellation.Token);
+                                if (countSleepDone < countSleep)
+                                {
+                                    countSleepDone++;
+                                    await Task.Delay(1);
+                                }
                             }
                         }
+                        
                     }
                 }
                 catch
@@ -858,7 +880,6 @@ namespace Xenophyte_RemoteNode.Object
                     SemaphoreSlimTransactionReader.Release();
             }
 
-            await CloseTransactionReader(cancellation);
 
             return transactionResult;
         }
@@ -1194,29 +1215,25 @@ namespace Xenophyte_RemoteNode.Object
 
                 #region From disk cache.
 
-                if (_enableDiskCache)
+
+                
+
+                if (_enableDiskCache || (_enableDiskCache && string.IsNullOrEmpty(result)))
                 {
 
-                    while (!cancellation.IsCancellationRequested)
-                    {
-                        string transactionResult = await GetTransactionFromFile(id, cancellation);
+                    string transactionResult = await GetTransactionFromFile(id, cancellation);
 
-                        if (!string.IsNullOrEmpty(transactionResult) && transactionResult.Length > 0)
-                        {
-                            UpdateTransaction(id, transactionResult);
-                            return new TransactionObject(id, transactionResult);
-                        }
+                    if (!string.IsNullOrEmpty(transactionResult) && transactionResult.Length > 0)
+                    {
+                        UpdateTransaction(id, transactionResult);
+                        return new TransactionObject(id, transactionResult);
                     }
+
+                    await Task.Delay(1);
+
                 }
 
                 #endregion
-
-                if (cancellation.IsCancellationRequested)
-                    return new TransactionObject(id, result);
-
-                // try again if the reading of the transaction has failed.
-                if (_enableDiskCache && (!string.IsNullOrEmpty(result) || result?.Length > 0))
-                    UpdateTransaction(id, result);
             }
 #if DEBUG
             catch(Exception error)
