@@ -8,12 +8,14 @@ namespace Xenophyte_RemoteNode.Object.Sub
     {
         public long Id;
         private string _transactionData;
+        public long Position;
 
 
-        public TransactionObject(long id, string transactionData)
+        public TransactionObject(long id, string transactionData, long position)
         {
             Id = id;
             _transactionData = transactionData;
+            Position = position;
             LastGetTimestamp = ClassUtilsNode.GetCurrentTimestampInSecond();
         }
 
@@ -31,7 +33,7 @@ namespace Xenophyte_RemoteNode.Object.Sub
                 if (!string.IsNullOrEmpty(value) && _transactionData?.Length > 0)
                     LastGetTimestamp = ClassUtilsNode.GetCurrentTimestampInSecond();
 
-                _transactionData = value == null ?  string.Empty : value;
+                _transactionData = value;
             } 
         }
 
