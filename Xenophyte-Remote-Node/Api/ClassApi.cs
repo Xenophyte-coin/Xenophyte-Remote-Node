@@ -600,7 +600,7 @@ namespace Xenophyte_RemoteNode.Api
                             if (splitPacket[1].Length >= ClassConnectorSetting.MinWalletAddressSize &&
                                 splitPacket[1].Length <= ClassConnectorSetting.MaxWalletAddressSize)
                             {
-                                if (ClassRemoteNodeSync.DictionaryCacheValidWalletAddress.ContainsKey(
+                                if (Program.DictionaryCacheValidWalletAddress.ContainsKey(
                                     splitPacket[1]))
                                 {
                                     EnableProxyMode = true;
@@ -644,7 +644,7 @@ namespace Xenophyte_RemoteNode.Api
                             if (splitPacket[1].Length >= ClassConnectorSetting.MinWalletAddressSize &&
                                 splitPacket[1].Length <= ClassConnectorSetting.MaxWalletAddressSize)
                             {
-                                if (ClassRemoteNodeSync.DictionaryCacheValidWalletAddress.ContainsKey(
+                                if (Program.DictionaryCacheValidWalletAddress.ContainsKey(
                                     splitPacket[1]))
                                 {
                                     string packetQuestionResult = await ClassTokenNetwork.GetWalletQuestionConfirmation(splitPacket[1]);
@@ -781,7 +781,7 @@ namespace Xenophyte_RemoteNode.Api
                                             if (!await SendPacketAsync(
                                                 ClassRemoteNodeCommandForWallet.RemoteNodeRecvPacketEnumeration
                                                     .WalletTotalNumberTransaction + "|" +
-                                                ClassRemoteNodeSync.ListOfTransaction.Count).ConfigureAwait(false))
+                                                Program.ListOfTransaction.Count).ConfigureAwait(false))
                                             {
                                                 IncomingConnectionStatus = false;
                                                 return false;
@@ -806,7 +806,7 @@ namespace Xenophyte_RemoteNode.Api
                                             if (!await SendPacketAsync(
                                                 ClassRemoteNodeCommandForWallet.RemoteNodeRecvPacketEnumeration
                                                     .SendRemoteNodeTotalBlockMined + "|" +
-                                                ClassRemoteNodeSync.ListOfBlock.Count).ConfigureAwait(false))
+                                                Program.ListOfBlock.Count).ConfigureAwait(false))
                                             {
                                                 IncomingConnectionStatus = false;
                                                 return false;
@@ -1110,10 +1110,10 @@ namespace Xenophyte_RemoteNode.Api
                                             if (long.TryParse(splitPacket[2], out var idTransactionAsk))
                                             {
                                                 if (idTransactionAsk >= 0 && idTransactionAsk <
-                                                    ClassRemoteNodeSync.ListOfTransaction.Count)
+                                                    Program.ListOfTransaction.Count)
                                                 {
 
-                                                   var result = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(idTransactionAsk, CancellationTokenApi);
+                                                   var result = await Program.ListOfTransaction.GetTransaction(idTransactionAsk, CancellationTokenApi);
 
                                                     if (result != null && !result.IsEmpty)
                                                     {
@@ -1152,9 +1152,9 @@ namespace Xenophyte_RemoteNode.Api
                                             if (int.TryParse(splitPacket[2], out var idTransactionAskTmp))
                                             {
                                                 if (idTransactionAskTmp >= 0 && idTransactionAskTmp <
-                                                    ClassRemoteNodeSync.ListOfTransaction.Count)
+                                                    Program.ListOfTransaction.Count)
                                                 {
-                                                    var transactionData = await ClassRemoteNodeSync
+                                                    var transactionData = await Program
                                                             .ListOfTransaction.GetTransaction(idTransactionAskTmp, CancellationTokenApi);
 
                                                     if (!await SendPacketAsync(
@@ -1184,14 +1184,14 @@ namespace Xenophyte_RemoteNode.Api
                                             if (int.TryParse(splitPacket[2], out var idBlockAskTmp))
                                             {
                                                 if (idBlockAskTmp >= 0 && idBlockAskTmp <
-                                                    ClassRemoteNodeSync.ListOfTransaction.Count)
+                                                    Program.ListOfTransaction.Count)
                                                 {
                                                     if (!await SendPacketAsync(
                                                             ClassRemoteNodeCommandForWallet
                                                                 .RemoteNodeRecvPacketEnumeration
                                                                 .SendRemoteNodeAskBlockHashPerId + "|" +
                                                             ClassUtilsNode.ConvertStringToSha512(
-                                                                ClassRemoteNodeSync.ListOfBlock[idBlockAskTmp]))
+                                                                Program.ListOfBlock[idBlockAskTmp]))
                                                         .ConfigureAwait(false))
                                                     {
                                                         IncomingConnectionStatus = false;
@@ -1216,8 +1216,8 @@ namespace Xenophyte_RemoteNode.Api
                                             if (!await SendPacketAsync(
                                                     ClassRemoteNodeCommandForWallet.RemoteNodeRecvPacketEnumeration
                                                         .SendRemoteNodeLastBlockFoundTimestamp + "|" +
-                                                    ClassRemoteNodeSync
-                                                        .ListOfBlock[ClassRemoteNodeSync.ListOfBlock.Count - 1]
+                                                    Program
+                                                        .ListOfBlock[Program.ListOfBlock.Count - 1]
                                                         .Split(new[] {"#"}, StringSplitOptions.None)[4])
                                                 .ConfigureAwait(false))
                                             {
@@ -1231,13 +1231,13 @@ namespace Xenophyte_RemoteNode.Api
                                             if (int.TryParse(splitPacket[2], out var idBlockAsk))
                                             {
                                                 if (idBlockAsk >= 0 &&
-                                                    idBlockAsk < ClassRemoteNodeSync.ListOfBlock.Count)
+                                                    idBlockAsk < Program.ListOfBlock.Count)
                                                 {
                                                     if (!await SendPacketAsync(
                                                             ClassRemoteNodeCommandForWallet
                                                                 .RemoteNodeRecvPacketEnumeration
                                                                 .SendRemoteNodeBlockPerId + "|" +
-                                                            ClassRemoteNodeSync.ListOfBlock[idBlockAsk])
+                                                            Program.ListOfBlock[idBlockAsk])
                                                         .ConfigureAwait(false))
                                                     {
                                                         IncomingConnectionStatus = false;

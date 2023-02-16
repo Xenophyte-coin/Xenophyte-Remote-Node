@@ -29,7 +29,7 @@ namespace Xenophyte_RemoteNode.Token
         /// <returns></returns>
         public static async Task<bool> CheckWalletAddressExistAsync(string walletAddress)
         {
-            if (ClassRemoteNodeSync.DictionaryCacheValidWalletAddress.ContainsKey(walletAddress))
+            if (Program.DictionaryCacheValidWalletAddress.ContainsKey(walletAddress))
             {
                 return true;
             }
@@ -54,10 +54,10 @@ namespace Xenophyte_RemoteNode.Token
                                 {
                                     try
                                     {
-                                        if (!ClassRemoteNodeSync.DictionaryCacheValidWalletAddress.ContainsKey(
+                                        if (!Program.DictionaryCacheValidWalletAddress.ContainsKey(
                                             walletAddress))
                                         {
-                                            ClassRemoteNodeSync.DictionaryCacheValidWalletAddress.Add(walletAddress, string.Empty);
+                                            Program.DictionaryCacheValidWalletAddress.Add(walletAddress, string.Empty);
                                         }
                                     }
                                     catch

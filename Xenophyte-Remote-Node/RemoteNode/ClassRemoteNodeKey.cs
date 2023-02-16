@@ -24,13 +24,13 @@ namespace Xenophyte_RemoteNode.RemoteNode
                 {
                     try
                     {
-                        if (ClassRemoteNodeSync.ListOfBlock.Count > 0)
+                        if (Program.ListOfBlock.Count > 0)
                             ClassRemoteNodeSync.TrustedKey = Utils.ClassUtilsNode.ConvertStringToSha512(
                                 ClassRemoteNodeSync.CoinCirculating + ClassRemoteNodeSync.CoinMaxSupply +
                                 ClassRemoteNodeSync.CurrentDifficulty + ClassRemoteNodeSync.CurrentHashrate +
                                 ClassRemoteNodeSync.TotalBlockMined + ClassRemoteNodeSync.CurrentTotalFee +
-                                ClassRemoteNodeSync.TotalPendingTransaction + ClassRemoteNodeSync
-                                    .ListOfBlock[ClassRemoteNodeSync.ListOfBlock.Count - 1]
+                                ClassRemoteNodeSync.TotalPendingTransaction + Program
+                                    .ListOfBlock[Program.ListOfBlock.Count - 1]
                                     .Split(new[] { "#" }, StringSplitOptions.None)[6]);
                         else
                             ClassRemoteNodeSync.TrustedKey = Utils.ClassUtilsNode.ConvertStringToSha512(
@@ -72,8 +72,8 @@ namespace Xenophyte_RemoteNode.RemoteNode
                             {
                                 if (long.TryParse(transaction, out var transactionId))
                                 {
-                                    if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(transactionId))
-                                        transactionBlock += ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionId, cancellation);
+                                    if (Program.ListOfTransaction.ContainsKey(transactionId))
+                                        transactionBlock += Program.ListOfTransaction.GetTransaction(transactionId, cancellation);
                                 }
                             }
                         }
@@ -115,9 +115,9 @@ namespace Xenophyte_RemoteNode.RemoteNode
                             {
                                 if (int.TryParse(block, out var blockId))
                                 {
-                                    if (ClassRemoteNodeSync.ListOfBlock.ContainsKey(blockId))
+                                    if (Program.ListOfBlock.ContainsKey(blockId))
                                     {
-                                        blockBLock += ClassRemoteNodeSync.ListOfBlock[blockId];
+                                        blockBLock += Program.ListOfBlock[blockId];
                                     }
                                 }
                             }

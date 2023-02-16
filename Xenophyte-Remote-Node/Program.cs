@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -22,6 +23,16 @@ namespace Xenophyte_RemoteNode
 {
     public class Program
     {
+        /// <summary>
+        /// Database store object's.
+        /// </summary>
+        public static BigDictionaryTransaction ListOfTransaction; // List of transaction of the blockchain.
+        public static BigDictionaryTransactionHash ListOfTransactionHash = new BigDictionaryTransactionHash(); // List of transaction hash of the blockchain.
+        public static Dictionary<long, string> ListOfBlock = new Dictionary<long, string>(); // List of block mined of the blockchain.
+        public static DictionaryBlockHash ListOfBlockHash = new DictionaryBlockHash(); // List of block mined hash of the blockchain.
+        public static Dictionary<string, string> DictionaryCacheValidWalletAddress = new Dictionary<string, string>();
+
+
         /// <summary>
         /// Remote node object of sync.
         /// </summary>
@@ -217,7 +228,7 @@ namespace Xenophyte_RemoteNode
                 
             }
 
-            ClassRemoteNodeSync.ListOfTransaction = new BigDictionaryTransaction(RemoteNodeSettingObject.enable_disk_cache_mode,
+            ListOfTransaction = new BigDictionaryTransaction(RemoteNodeSettingObject.enable_disk_cache_mode,
             ClassRemoteNodeSave.GetCurrentPath() + ClassRemoteNodeSave.GetBlockchainTransactionPath() + ClassRemoteNodeSave.BlockchainTransactionDatabase);
 
             if (ClassRemoteNodeSave.LoadBlockchainTransaction(_remoteCancellationTokenSource).Result)

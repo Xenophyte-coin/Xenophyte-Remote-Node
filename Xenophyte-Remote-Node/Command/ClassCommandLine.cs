@@ -46,12 +46,12 @@ namespace Xenophyte_RemoteNode.Command
                         Console.WriteLine(ClassCommandLineEnumeration.CommandLineExit + " -> Save sync and Exit the node.");
                         break;
                     case ClassCommandLineEnumeration.CommandLineStatus:
-                        Console.WriteLine("Total Transaction Sync: " + (ClassRemoteNodeSync.ListOfTransaction.Count));
+                        Console.WriteLine("Total Transaction Sync: " + (Program.ListOfTransaction.Count));
                         Console.WriteLine("Total Transaction in the Blockchain: " + ClassRemoteNodeSync.TotalTransaction);
                         long totalTransactionSortedPerWallet = ClassRemoteNodeSync.ListTransactionPerWallet.Count;
 
                         Console.WriteLine("Total Transaction Sorted for Wallet(s): " + totalTransactionSortedPerWallet);
-                        Console.WriteLine("Total Block(s) Sync: " + (ClassRemoteNodeSync.ListOfBlock.Count));
+                        Console.WriteLine("Total Block(s) Sync: " + (Program.ListOfBlock.Count));
                         Console.WriteLine("Total Block(s) mined in the Blockchain: " + ClassRemoteNodeSync.TotalBlockMined);
                         Console.WriteLine("Total Block(s) left to mining: " + ClassRemoteNodeSync.CurrentBlockLeft);
                         Console.WriteLine("Total pending transaction in the network: " + ClassRemoteNodeSync.TotalPendingTransaction);
@@ -90,11 +90,11 @@ namespace Xenophyte_RemoteNode.Command
                         
                         break;
                     case ClassCommandLineEnumeration.CommandLineTransaction:
-                        Console.WriteLine("Total Transaction Sync: " + (ClassRemoteNodeSync.ListOfTransaction.Count));
+                        Console.WriteLine("Total Transaction Sync: " + (Program.ListOfTransaction.Count));
                         Console.WriteLine("Total Transaction in the Blockchain: " + ClassRemoteNodeSync.TotalTransaction);
                         break;
                     case ClassCommandLineEnumeration.CommandLineBlock:
-                        Console.WriteLine("Total Block(s) Sync: " + (ClassRemoteNodeSync.ListOfBlock.Count));
+                        Console.WriteLine("Total Block(s) Sync: " + (Program.ListOfBlock.Count));
                         Console.WriteLine("Total Block(s) mined in the Blockchain: " + ClassRemoteNodeSync.TotalBlockMined);
                         Console.WriteLine("Total Block(s) left to mining: " + ClassRemoteNodeSync.CurrentBlockLeft);
                         break;
@@ -132,11 +132,11 @@ namespace Xenophyte_RemoteNode.Command
                         }
                         else
                         {
-                            ClassRemoteNodeSync.ListOfTransaction.Clear();
-                            ClassRemoteNodeSync.ListOfTransactionHash.Clear();
+                            Program.ListOfTransaction.Clear();
+                            Program.ListOfTransactionHash.Clear();
                             ClassRemoteNodeSync.ListTransactionPerWallet.Clear();
-                            ClassRemoteNodeSync.ListOfBlock.Clear();
-                            ClassRemoteNodeSync.ListOfBlockHash.Clear();
+                            Program.ListOfBlock.Clear();
+                            Program.ListOfBlockHash.Clear();
                             ClassRemoteNodeSave.ClearBlockSyncSave();
                             ClassRemoteNodeSave.ClearTransactionSyncSave();
                             ClassRemoteNodeKey.DataBlockRead = string.Empty;

@@ -64,11 +64,11 @@ namespace Xenophyte_RemoteNode.Api
                 ClassRemoteNodeSync.ListTransactionPerWallet.GetTransactionPerId(walletId, transactionId);
             if (TupleTransaction.Item1 != "WRONG")
             {
-                long getTransactionId = ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(TupleTransaction.Item1);
+                long getTransactionId = Program.ListOfTransactionHash.ContainsKey(TupleTransaction.Item1);
 
                 if (getTransactionId != -1)
                 {
-                    Transaction = (await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(getTransactionId, cancellation)).TransactionData;
+                    Transaction = (await Program.ListOfTransaction.GetTransaction(getTransactionId, cancellation)).TransactionData;
                     if (Transaction != "WRONG")
                     {
                         var dataTransactionSplit = Transaction.Split(new[] {"-"}, StringSplitOptions.None);

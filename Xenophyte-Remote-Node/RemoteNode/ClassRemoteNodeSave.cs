@@ -18,10 +18,10 @@ namespace Xenophyte_RemoteNode.RemoteNode
     {
         public static readonly string BlockchainTransactionDatabase = "transaction.xenodb";
         public static readonly string BlockchainTransactionDatabaseBackup = "transaction-bak.xenodb";
-        private static readonly string BlockchainBlockDatabase = "block.xenodb";
+        public static readonly string BlockchainBlockDatabase = "block.xenodb";
         private static readonly string BlockchainDirectory = "\\Blockchain\\";
         private static readonly string BlockchainTransactionDirectory = "\\Blockchain\\Transaction\\";
-        private static readonly string BlockchainBlockDirectory = "\\Blockchain\\Block\\";
+        public static readonly string BlockchainBlockDirectory = "\\Blockchain\\Block\\";
         private static readonly string BlockchainWalletCacheDirectory = "\\Blockchain\\Wallet\\";
         private static readonly string BlockchainWalletCacheDatabase = "wallet-cache.xenodb";
 
@@ -108,7 +108,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
         ///     Get blockchain path of block database.
         /// </summary>
         /// <returns></returns>
-        private static string GetBlockchainBlockPath()
+        public static string GetBlockchainBlockPath()
         {
             var path = BlockchainBlockDirectory;
             if (Environment.OSVersion.Platform == PlatformID.Unix) path = path.Replace("\\", "/");
@@ -153,9 +153,9 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                         if (ClassRemoteNodeSortingTransactionPerWallet.AddNewTransactionSortedPerWallet(splitTransactionLine[1], transactionId))
                                         {
                                             if (Program.RemoteNodeSettingObject.enable_disk_cache_mode)
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionId, null, sr.BaseStream.Position - line.Length);
+                                                Program.ListOfTransaction.InsertTransaction(transactionId, null, sr.BaseStream.Position - line.Length);
                                             else
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionId, splitTransactionLine[1], sr.BaseStream.Position - line.Length);
+                                                Program.ListOfTransaction.InsertTransaction(transactionId, splitTransactionLine[1], sr.BaseStream.Position - line.Length);
                                         }
                                     }
                                     else
@@ -173,9 +173,9 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                         if (ClassRemoteNodeSortingTransactionPerWallet.AddNewTransactionSortedPerWallet(transactionRaw, transactionObject.transaction_id))
                                         {
                                             if (Program.RemoteNodeSettingObject.enable_disk_cache_mode)
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionObject.transaction_id, null, sr.BaseStream.Position - line.Length);
+                                                Program.ListOfTransaction.InsertTransaction(transactionObject.transaction_id, null, sr.BaseStream.Position - line.Length);
                                             else
-                                                ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionObject.transaction_id, transactionRaw, sr.BaseStream.Position - line.Length);
+                                                Program.ListOfTransaction.InsertTransaction(transactionObject.transaction_id, transactionRaw, sr.BaseStream.Position - line.Length);
                                         }
                                     }
                                     else
@@ -196,8 +196,8 @@ namespace Xenophyte_RemoteNode.RemoteNode
                     if (error)
                     {
                         Console.WriteLine("Transaction database seems corrupted, start to clear transaction database and resync..");
-                        ClassRemoteNodeSync.ListOfTransaction.Clear();
-                        ClassRemoteNodeSync.ListOfTransactionHash.Clear();
+                        Program.ListOfTransaction.Clear();
+                        Program.ListOfTransactionHash.Clear();
                         ClassRemoteNodeSync.ListTransactionPerWallet.Clear();
                         ClearTransactionSyncSave();
                         ClassUtilsNode.ClearGc();
@@ -212,9 +212,9 @@ namespace Xenophyte_RemoteNode.RemoteNode
                             {
                                 if (totalRetrieve < Program.RemoteNodeSettingObject.max_keep_alive_transaction_memory)
                                 {
-                                    var transaction = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(i, cancellation);
+                                    var transaction = await Program.ListOfTransaction.GetTransaction(i, cancellation);
 
-                                    ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transaction.Id, transaction.TransactionData, transaction.Position);
+                                    Program.ListOfTransaction.InsertTransaction(transaction.Id, transaction.TransactionData, transaction.Position);
                                     totalRetrieve++;
                                 }
                                 else break;
@@ -271,13 +271,13 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                     long blockId = long.Parse(splitLineBlock[0]);
                                     if (blockId == counter)
                                     {
-                                        if (!ClassRemoteNodeSync.ListOfBlock.ContainsKey(blockId - 1))
+                                        if (!Program.ListOfBlock.ContainsKey(blockId - 1))
                                         {
                                             string blockHash = splitLineBlock[1];
-                                            if (ClassRemoteNodeSync.ListOfBlockHash.GetBlockIdFromHash(blockHash) == -1)
+                                            if (Program.ListOfBlockHash.GetBlockIdFromHash(blockHash) == -1)
                                             {
-                                                ClassRemoteNodeSync.ListOfBlock.Add(blockId - 1, line);
-                                                ClassRemoteNodeSync.ListOfBlockHash.InsertBlockHash(blockHash, blockId - 1);
+                                                Program.ListOfBlock.Add(blockId - 1, line);
+                                                Program.ListOfBlockHash.InsertBlockHash(blockHash, blockId - 1);
                                             }
                                         }
                                     }
@@ -299,8 +299,8 @@ namespace Xenophyte_RemoteNode.RemoteNode
                 if (error)
                 {
                     Console.WriteLine("Block database seems corrupted, start to clear block database and resync..");
-                    ClassRemoteNodeSync.ListOfBlock.Clear();
-                    ClassRemoteNodeSync.ListOfBlockHash.Clear();
+                    Program.ListOfBlock.Clear();
+                    Program.ListOfBlockHash.Clear();
                     ClearBlockSyncSave();
                     ClassUtilsNode.ClearGc();
                     return;
@@ -339,11 +339,11 @@ namespace Xenophyte_RemoteNode.RemoteNode
                             while ((line = sr.ReadLine()) != null)
                             {
                                 counter++;
-                                if (ClassRemoteNodeSync.DictionaryCacheValidWalletAddress.Count < int.MaxValue - 1)
+                                if (Program.DictionaryCacheValidWalletAddress.Count < int.MaxValue - 1)
                                 {
-                                    if (!ClassRemoteNodeSync.DictionaryCacheValidWalletAddress.ContainsKey(line))
+                                    if (!Program.DictionaryCacheValidWalletAddress.ContainsKey(line))
                                     {
-                                        ClassRemoteNodeSync.DictionaryCacheValidWalletAddress.Add(line, line);
+                                        Program.DictionaryCacheValidWalletAddress.Add(line, line);
                                     }
                                 }
                             }
@@ -414,26 +414,26 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
                                     InSaveTransactionDatabase = true;
 
-                                    if (ClassRemoteNodeSync.ListOfTransaction != null)
+                                    if (Program.ListOfTransaction != null)
                                     {
-                                        if (ClassRemoteNodeSync.ListOfTransaction.Count > 0)
+                                        if (Program.ListOfTransaction.Count > 0)
                                         {
-                                            if (TotalTransactionSaved > ClassRemoteNodeSync.ListOfTransaction.Count)
+                                            if (TotalTransactionSaved > Program.ListOfTransaction.Count)
                                                 ClearTransactionSyncSave();
                                             else
                                             {
                                                 bool changeDone = false;
 
-                                                if (TotalTransactionSaved < ClassRemoteNodeSync.ListOfTransaction.Count)
+                                                if (TotalTransactionSaved < Program.ListOfTransaction.Count)
                                                 {
 
                                                     for (long i = TotalTransactionSaved;
-                                                        i < ClassRemoteNodeSync.ListOfTransaction.Count;
+                                                        i < Program.ListOfTransaction.Count;
                                                         i++)
                                                     {
-                                                        if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(i))
+                                                        if (Program.ListOfTransaction.ContainsKey(i))
                                                         {
-                                                            var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(i, _cancellationTokenSaveTransaction);
+                                                            var transactionObject = await Program.ListOfTransaction.GetTransaction(i, _cancellationTokenSaveTransaction);
                                                             if (transactionObject.TransactionData == null)
                                                                 break;
 
@@ -447,15 +447,15 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
                                                             if (Program.RemoteNodeSettingObject.enable_disk_cache_mode)
                                                             {
-                                                                if (!ClassRemoteNodeSync.ListOfTransaction.DictionaryStreamPosition.ContainsKey(transactionObject.Id))
-                                                                    ClassRemoteNodeSync.ListOfTransaction.DictionaryStreamPosition.TryAdd(transactionObject.Id, _blockchainTransactionWriter.BaseStream.Position - transactionObject.TransactionData.Length);
+                                                                if (!Program.ListOfTransaction.DictionaryStreamPosition.ContainsKey(transactionObject.Id))
+                                                                    Program.ListOfTransaction.DictionaryStreamPosition.TryAdd(transactionObject.Id, _blockchainTransactionWriter.BaseStream.Position - transactionObject.TransactionData.Length);
                                                                 else
-                                                                    ClassRemoteNodeSync.ListOfTransaction.DictionaryStreamPosition[transactionObject.Id] = _blockchainTransactionWriter.BaseStream.Position - transactionObject.TransactionData.Length;
+                                                                    Program.ListOfTransaction.DictionaryStreamPosition[transactionObject.Id] = _blockchainTransactionWriter.BaseStream.Position - transactionObject.TransactionData.Length;
                                                             }
 
-                                                            if (ClassRemoteNodeSync.ListOfTransaction.TransactionExpired(i, Program.RemoteNodeSettingObject.max_delay_transaction_memory))
+                                                            if (Program.ListOfTransaction.TransactionExpired(i, Program.RemoteNodeSettingObject.max_delay_transaction_memory))
                                                             {
-                                                                ClassRemoteNodeSync.ListOfTransaction.ClearTransaction(i);
+                                                                Program.ListOfTransaction.ClearTransaction(i);
                                                                 totalCleanedUp++;
                                                             }
                                                         
@@ -470,7 +470,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
                                                     if (changeDone)
                                                     {
-                                                        if (await ClassRemoteNodeSync.ListOfTransaction.CloseTransactionReader(_cancellationTokenSaveTransaction))
+                                                        if (await Program.ListOfTransaction.CloseTransactionReader(_cancellationTokenSaveTransaction))
                                                         {
 
                                                             bool useSemaphore = false;
@@ -480,7 +480,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
                                                                 try
                                                                 {
-                                                                    await ClassRemoteNodeSync.ListOfTransaction.SemaphoreSlimTransactionReader.WaitAsync(_cancellationTokenSaveTransaction.Token);
+                                                                    await Program.ListOfTransaction.SemaphoreSlimTransactionReader.WaitAsync(_cancellationTokenSaveTransaction.Token);
                                                                     useSemaphore = true;
 
 
@@ -497,7 +497,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                             finally
                                                             {
                                                                 if (useSemaphore)
-                                                                    ClassRemoteNodeSync.ListOfTransaction.SemaphoreSlimTransactionReader.Release();
+                                                                    Program.ListOfTransaction.SemaphoreSlimTransactionReader.Release();
                                                             }
                                                         }
                                                     }
@@ -558,19 +558,19 @@ namespace Xenophyte_RemoteNode.RemoteNode
                         {
                             InSaveTransactionDatabase = true;
 
-                            if (ClassRemoteNodeSync.ListOfTransaction != null)
+                            if (Program.ListOfTransaction != null)
                             {
-                                if (ClassRemoteNodeSync.ListOfTransaction.Count > 0)
+                                if (Program.ListOfTransaction.Count > 0)
                                 {
 
 
                                     for (long i = TotalTransactionSaved;
-                                        i < ClassRemoteNodeSync.ListOfTransaction.Count;
+                                        i < Program.ListOfTransaction.Count;
                                         i++)
                                     {
-                                        if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(i))
+                                        if (Program.ListOfTransaction.ContainsKey(i))
                                         {
-                                            var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(i, _cancellationTokenSaveTransaction);
+                                            var transactionObject = await Program.ListOfTransaction.GetTransaction(i, _cancellationTokenSaveTransaction);
                                             if (transactionObject.TransactionData == null)
                                                 break;
 
@@ -580,14 +580,14 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                             else
                                                 _blockchainTransactionWriter.WriteLine(JsonConvert.SerializeObject(ClassTransactionUtility.BuildTransactionObjectFromRaw(transactionObject.Id, transactionObject.TransactionData), Formatting.None));
 
-                                            ClassRemoteNodeSync.ListOfTransaction.ClearTransaction(i);
+                                            Program.ListOfTransaction.ClearTransaction(i);
 
                                         }
                                     }
                                 }
                             }
 
-                           await ClassRemoteNodeSync.ListOfTransaction.CloseTransactionReader(cancellationTokenSource);
+                           await Program.ListOfTransaction.CloseTransactionReader(cancellationTokenSource);
 
 
 
@@ -672,20 +672,20 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
 
                                     InSaveBlockDatabase = true;
-                                    if (ClassRemoteNodeSync.ListOfBlock != null)
-                                        if (ClassRemoteNodeSync.ListOfBlock.Count > 0)
+                                    if (Program.ListOfBlock != null)
+                                        if (Program.ListOfBlock.Count > 0)
                                         {
-                                            if (TotalBlockSaved != ClassRemoteNodeSync.ListOfBlock.Count)
+                                            if (TotalBlockSaved != Program.ListOfBlock.Count)
                                             {
-                                                for (var i = TotalBlockSaved; i < ClassRemoteNodeSync.ListOfBlock.Count; i++)
+                                                for (var i = TotalBlockSaved; i < Program.ListOfBlock.Count; i++)
                                                 {
-                                                    if (ClassRemoteNodeSync.ListOfBlock.ContainsKey(i))
+                                                    if (Program.ListOfBlock.ContainsKey(i))
                                                     {
-                                                        _blockchainBlockWriter.WriteLine(ClassRemoteNodeSync.ListOfBlock[i]);
+                                                        _blockchainBlockWriter.WriteLine(Program.ListOfBlock[i]);
                                                     }
                                                 }
 
-                                                TotalBlockSaved = ClassRemoteNodeSync.ListOfBlock.Count;
+                                                TotalBlockSaved = Program.ListOfBlock.Count;
                                             }
                                         }
 
@@ -733,24 +733,24 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
 
                         InSaveBlockDatabase = true;
-                        if (ClassRemoteNodeSync.ListOfBlock != null)
+                        if (Program.ListOfBlock != null)
                         {
-                            if (ClassRemoteNodeSync.ListOfBlock.Count > 0)
+                            if (Program.ListOfBlock.Count > 0)
                             {
                                 using (var sw = new StreamWriter(GetCurrentPath() + GetBlockchainBlockPath() +
                                                                  BlockchainBlockDatabase, true, Encoding.UTF8, 8192)
                                 { AutoFlush = true })
                                 {
-                                    for (var i = 0; i < ClassRemoteNodeSync.ListOfBlock.Count; i++)
+                                    for (var i = 0; i < Program.ListOfBlock.Count; i++)
                                     {
-                                        if (ClassRemoteNodeSync.ListOfBlock.ContainsKey(i))
+                                        if (Program.ListOfBlock.ContainsKey(i))
                                         {
-                                            sw.WriteLine(ClassRemoteNodeSync.ListOfBlock[i]);
+                                            sw.WriteLine(Program.ListOfBlock[i]);
                                         }
                                     }
                                 }
 
-                                TotalBlockSaved = ClassRemoteNodeSync.ListOfBlock.Count;
+                                TotalBlockSaved = Program.ListOfBlock.Count;
                             }
                         }
 
@@ -822,15 +822,15 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
 
                                     InSaveWalletCacheDatabase = true;
-                                    if (ClassRemoteNodeSync.DictionaryCacheValidWalletAddress != null)
+                                    if (Program.DictionaryCacheValidWalletAddress != null)
                                     {
-                                        if (ClassRemoteNodeSync.DictionaryCacheValidWalletAddress.Count > 0)
+                                        if (Program.DictionaryCacheValidWalletAddress.Count > 0)
                                         {
 
-                                            if (TotalWalletCacheSaved != ClassRemoteNodeSync
+                                            if (TotalWalletCacheSaved != Program
                                                     .DictionaryCacheValidWalletAddress.Count)
                                             {
-                                                var walletCache = ClassRemoteNodeSync.DictionaryCacheValidWalletAddress
+                                                var walletCache = Program.DictionaryCacheValidWalletAddress
                                                     .ToArray();
                                                 for (var i = TotalWalletCacheSaved;
                                                     i < walletCache.Length;
@@ -895,12 +895,12 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
 
                         InSaveWalletCacheDatabase = true;
-                        if (ClassRemoteNodeSync.DictionaryCacheValidWalletAddress != null)
+                        if (Program.DictionaryCacheValidWalletAddress != null)
                         {
-                            if (ClassRemoteNodeSync.DictionaryCacheValidWalletAddress.Count > 0)
+                            if (Program.DictionaryCacheValidWalletAddress.Count > 0)
                             {
 
-                                var walletCache = ClassRemoteNodeSync.DictionaryCacheValidWalletAddress.ToArray();
+                                var walletCache = Program.DictionaryCacheValidWalletAddress.ToArray();
                                 using (var sw = new StreamWriter(GetCurrentPath() + GetBlockchainWalletCachePath() + BlockchainWalletCacheDatabase, true, Encoding.UTF8, 8192)
                                 { AutoFlush = true })
                                 {

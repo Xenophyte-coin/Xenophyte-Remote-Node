@@ -63,10 +63,10 @@ namespace Xenophyte_RemoteNode.RemoteNode
 
 
                     string hashTransaction = dataTransactionSplit[5]; // Transaction hash.
-                    if (ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(hashTransaction) < 0)
+                    if (Program.ListOfTransactionHash.ContainsKey(hashTransaction) < 0)
                     {
 
-                        if (ClassRemoteNodeSync.ListOfTransactionHash.InsertTransactionHash(idTransaction, hashTransaction))
+                        if (Program.ListOfTransactionHash.InsertTransactionHash(idTransaction, hashTransaction))
                         {
 
 
