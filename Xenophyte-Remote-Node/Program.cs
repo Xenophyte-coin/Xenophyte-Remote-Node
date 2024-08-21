@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -23,16 +22,6 @@ namespace Xenophyte_RemoteNode
 {
     public class Program
     {
-        /// <summary>
-        /// Database store object's.
-        /// </summary>
-        public static BigDictionaryTransaction ListOfTransaction; // List of transaction of the blockchain.
-        public static BigDictionaryTransactionHash ListOfTransactionHash = new BigDictionaryTransactionHash(); // List of transaction hash of the blockchain.
-        public static Dictionary<long, string> ListOfBlock = new Dictionary<long, string>(); // List of block mined of the blockchain.
-        public static DictionaryBlockHash ListOfBlockHash = new DictionaryBlockHash(); // List of block mined hash of the blockchain.
-        public static Dictionary<string, string> DictionaryCacheValidWalletAddress = new Dictionary<string, string>();
-
-
         /// <summary>
         /// Remote node object of sync.
         /// </summary>
@@ -163,9 +152,6 @@ namespace Xenophyte_RemoteNode
             Thread.CurrentThread.Name = Path.GetFileName(Environment.GetCommandLineArgs()[0]);
             ClassRemoteNodeSave.InitializePath();
 
-            ClassRemoteNodeSave.LoadBlockchainWalletCache();
-
-
             if (File.Exists(ClassUtilsNode.ConvertPath(AppDomain.CurrentDomain.BaseDirectory + ConfigFilePath)))
             {
                 if (ReadConfigFile())
@@ -228,10 +214,10 @@ namespace Xenophyte_RemoteNode
                 
             }
 
-            ListOfTransaction = new BigDictionaryTransaction(RemoteNodeSettingObject.enable_disk_cache_mode,
-            ClassRemoteNodeSave.GetCurrentPath() + ClassRemoteNodeSave.GetBlockchainTransactionPath() + ClassRemoteNodeSave.BlockchainTransactionDatabase);
+            ClassRemoteNodeSync.ListOfTransaction = new BigDictionaryTransaction(RemoteNodeSettingObject.enable_disk_cache_mode,
+            ClassRemoteNodeSave.GetCurrentPath() + ClassRemoteNodeSave.GetBlockchainTransactionPath() + ClassRemoteNodeSave.BlockchainTransactonDatabase);
 
-            if (ClassRemoteNodeSave.LoadBlockchainTransaction(_remoteCancellationTokenSource).Result)
+            if (ClassRemoteNodeSave.LoadBlockchainTransaction())
                 ClassRemoteNodeSave.LoadBlockchainBlock();
             
 
@@ -276,9 +262,8 @@ namespace Xenophyte_RemoteNode
                 ClassRemoteNodeKey.StartUpdateTrustedKey();
 
                 Console.WriteLine("Enable Auto save system..");
-                await ClassRemoteNodeSave.SaveTransaction();
+                ClassRemoteNodeSave.SaveTransaction();
                 ClassRemoteNodeSave.SaveBlock();
-                ClassRemoteNodeSave.SaveWalletCache();
 
                 Console.WriteLine("Enable API..");
                 ClassApi.StartApiRemoteNode();
@@ -372,9 +357,9 @@ namespace Xenophyte_RemoteNode
             RemoteNodeWalletAddress = Console.ReadLine();
 
 
-            Console.WriteLine("Checking wallet address..");
-            bool checkWalletAddress =
-                ClassTokenNetwork.CheckWalletAddressExistAsync(RemoteNodeWalletAddress).Result;
+            //Console.WriteLine("Checking wallet address..");
+            bool checkWalletAddress = true;
+                //ClassTokenNetwork.CheckWalletAddressExistAsync(RemoteNodeWalletAddress).Result;
 
             while (RemoteNodeWalletAddress != null && (RemoteNodeWalletAddress.Length < ClassConnectorSetting.MinWalletAddressSize ||
                                                        RemoteNodeWalletAddress.Length > ClassConnectorSetting.MaxWalletAddressSize ||
@@ -632,12 +617,12 @@ namespace Xenophyte_RemoteNode
                         bool wasWrongWalletAddress = false;
 
                         Console.WriteLine("Checking wallet address..");
-                        bool checkWalletAddress = ClassTokenNetwork
+                        /*bool checkWalletAddress = ClassTokenNetwork
                             .CheckWalletAddressExistAsync(RemoteNodeWalletAddress).Result;
-
+                        */
                         while (RemoteNodeWalletAddress.Length < ClassConnectorSetting.MinWalletAddressSize ||
-                               RemoteNodeWalletAddress.Length > ClassConnectorSetting.MaxWalletAddressSize ||
-                               !checkWalletAddress)
+                               RemoteNodeWalletAddress.Length > ClassConnectorSetting.MaxWalletAddressSize 
+                               /* || !checkWalletAddress*/)
                         {
                             wasWrongWalletAddress = true;
                             Console.WriteLine("Invalid wallet address - Please, write your valid wallet address: ");
@@ -645,8 +630,8 @@ namespace Xenophyte_RemoteNode
                             RemoteNodeWalletAddress =
                                 ClassUtilsNode.RemoveSpecialCharacters(RemoteNodeWalletAddress);
                             Console.WriteLine("Checking wallet address..", 4);
-                            checkWalletAddress = ClassTokenNetwork
-                                .CheckWalletAddressExistAsync(RemoteNodeWalletAddress).Result;
+                            /*checkWalletAddress = ClassTokenNetwork
+                                .CheckWalletAddressExistAsync(RemoteNodeWalletAddress).Result;*/
                         }
 
                         Console.WriteLine("Wallet address: " + RemoteNodeWalletAddress + " is valid.", 1);

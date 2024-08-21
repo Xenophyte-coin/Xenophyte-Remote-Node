@@ -329,24 +329,24 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                             if (!string.IsNullOrEmpty(ClassRemoteNodeSync.TotalBlockMined)
                                             ) // Ask Blocks only when this information is sync.
                                             {
-                                                if (Program.ListOfBlock.Count.ToString() !=
+                                                if (ClassRemoteNodeSync.ListOfBlock.Count.ToString() !=
                                                     ClassRemoteNodeSync.TotalBlockMined)
                                                 {
                                                     if (long.TryParse(ClassRemoteNodeSync.TotalBlockMined,
                                                         out var totalBlockMined))
                                                     {
-                                                        if (Program.ListOfBlock.Count > totalBlockMined + 1)
+                                                        if (ClassRemoteNodeSync.ListOfBlock.Count > totalBlockMined + 1)
                                                         {
                                                             ClassLog.Log("Too much block, clean sync: ", 2, 3);
-                                                            Program.ListOfBlock.Clear();
-                                                            Program.ListOfBlockHash.Clear();
+                                                            ClassRemoteNodeSync.ListOfBlock.Clear();
+                                                            ClassRemoteNodeSync.ListOfBlockHash.Clear();
                                                             ClassRemoteNodeKey.DataBlockRead = string.Empty;
                                                         }
 
-                                                        askBlock -= Program.ListOfBlock.Count;
+                                                        askBlock -= ClassRemoteNodeSync.ListOfBlock.Count;
                                                         if (askBlock > 0)
                                                         {
-                                                            long totalBlockSaved = Program.ListOfBlock.Count;
+                                                            long totalBlockSaved = ClassRemoteNodeSync.ListOfBlock.Count;
                                                             for (var i = 0; i < askBlock; i++)
                                                             {
                                                                 var cancelBlock = false;
@@ -431,7 +431,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                             ) // Ask Transactions only when this information is sync.
                                             {
                                                 RemoteNodeObjectInSyncTransaction = true;
-                                                if (Program.ListOfTransaction.Count.ToString() !=
+                                                if (ClassRemoteNodeSync.ListOfTransaction.Count.ToString() !=
                                                     ClassRemoteNodeSync.TotalTransaction)
                                                 {
                                                     if (long.TryParse(ClassRemoteNodeSync.TotalTransaction,
@@ -443,12 +443,12 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                             out var askTransaction))
                                                         {
                                                             long totalTransactionSaved =
-                                                                Program.ListOfTransaction.Count;
+                                                                ClassRemoteNodeSync.ListOfTransaction.Count;
 
                                                             if (totalTransactionSaved < askTransaction)
                                                             {
 
-                                                                long transactionIdAsked = Program.ListOfTransaction.Count;
+                                                                long transactionIdAsked = ClassRemoteNodeSync.ListOfTransaction.Count;
 
                                                                 if (transactionIdAsked <= askTransaction)
                                                                 {
@@ -481,7 +481,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                                             break;
                                                                         }
 
-                                                                        if (Program.ListOfBlock.Count < int.Parse(ClassRemoteNodeSync.TotalBlockMined))
+                                                                        if (ClassRemoteNodeSync.ListOfBlock.Count < int.Parse(ClassRemoteNodeSync.TotalBlockMined))
                                                                         {
                                                                             await Task.Delay(ClassUtils.GetRandomBetween(1, 100));
                                                                         }
@@ -500,8 +500,8 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                                     if (totalTransactionSaved > totalTransaction + 1)
                                                                     {
                                                                         ClassLog.Log("Too much transaction, clean sync: ", 2, 3);
-                                                                        Program.ListOfTransaction.Clear();
-                                                                        Program.ListOfTransactionHash.Clear();
+                                                                        ClassRemoteNodeSync.ListOfTransaction.Clear();
+                                                                        ClassRemoteNodeSync.ListOfTransactionHash.Clear();
                                                                         ClassRemoteNodeSync.ListTransactionPerWallet.Clear();
                                                                         ClassRemoteNodeKey.DataTransactionRead = string.Empty;
                                                                         await StopConnection(string.Empty);
@@ -517,7 +517,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                                             }
                                                                             if (i < totalTransaction)
                                                                             {
-                                                                                if (!Program.ListOfTransaction.ContainsKey(i))
+                                                                                if (!ClassRemoteNodeSync.ListOfTransaction.ContainsKey(i))
                                                                                 {
                                                                                     RemoteNodeObjectInReceiveTransaction = true;
                                                                                     if (!await RemoteNodeObjectTcpClient
@@ -537,7 +537,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                                                             break;
                                                                                         }
 
-                                                                                        if (Program.ListOfBlock.Count < int.Parse(ClassRemoteNodeSync.TotalBlockMined))
+                                                                                        if (ClassRemoteNodeSync.ListOfBlock.Count < int.Parse(ClassRemoteNodeSync.TotalBlockMined))
                                                                                         {
                                                                                             await Task.Delay(ClassUtils.GetRandomBetween(1, 100));
                                                                                         }
@@ -733,7 +733,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                             {
                                 if (long.TryParse(ClassRemoteNodeSync.TotalTransaction, out var totalTransactionToSync))
                                 {
-                                    if (totalTransactionToSync <= Program.ListOfTransaction.Count)
+                                    if (totalTransactionToSync <= ClassRemoteNodeSync.ListOfTransaction.Count)
                                     {
                                         await Task.Delay(RemoteNodeObjectLoopSendRequestInterval2); // Make a pause for the next sync of transaction.
                                     }
@@ -747,7 +747,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                             {
                                 if (int.TryParse(ClassRemoteNodeSync.TotalBlockMined, out var totalBlockMinedToSync))
                                 {
-                                    if (totalBlockMinedToSync <= Program.ListOfBlock.Count)
+                                    if (totalBlockMinedToSync <= ClassRemoteNodeSync.ListOfBlock.Count)
                                     {
                                         await Task.Delay(RemoteNodeObjectLoopSendRequestInterval2); // Make a pause for the next sync of transaction.
                                     }
@@ -872,20 +872,20 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                         var blockSubString = splitBlock[i].Substring(0, splitBlock[i].Length - 1);
                                         var blockLineSplit = blockSubString.Split(new[] { "#" }, StringSplitOptions.None);
                                         var blockIdTmp = long.Parse(blockLineSplit[0]);
-                                        if (!Program.ListOfBlock.ContainsKey(blockIdTmp - 1))
+                                        if (!ClassRemoteNodeSync.ListOfBlock.ContainsKey(blockIdTmp - 1))
                                         {
-                                            if (Program.ListOfBlockHash.GetBlockIdFromHash(blockLineSplit[1]) == -1)
+                                            if (ClassRemoteNodeSync.ListOfBlockHash.GetBlockIdFromHash(blockLineSplit[1]) == -1)
                                             {
                                                 try
                                                 {
-                                                    if (Program.ListOfBlockHash.InsertBlockHash(blockLineSplit[1], blockIdTmp - 1))
+                                                    if (ClassRemoteNodeSync.ListOfBlockHash.InsertBlockHash(blockLineSplit[1], blockIdTmp - 1))
                                                     {
-                                                        Program.ListOfBlock.Add(blockIdTmp - 1, blockSubString);
-                                                        if (Program.ListOfBlock.Count.ToString("F0") ==
+                                                        ClassRemoteNodeSync.ListOfBlock.Add(blockIdTmp - 1, blockSubString);
+                                                        if (ClassRemoteNodeSync.ListOfBlock.Count.ToString("F0") ==
                                                             ClassRemoteNodeSync.TotalBlockMined)
                                                         {
                                                             ClassLog.Log(
-                                                                "Block mined synced, " + Program.ListOfBlock.Count +
+                                                                "Block mined synced, " + ClassRemoteNodeSync.ListOfBlock.Count +
                                                                 "/" + ClassRemoteNodeSync.TotalBlockMined, 0, 1);
                                                             if (!await RemoteNodeObjectTcpClient.SendPacketToSeedNodeAsync(ClassRemoteNodeCommand.ClassRemoteNodeSendToSeedEnumeration.RemoteAskSchemaBlock, Program.Certificate, false, true))
                                                             {
@@ -901,7 +901,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                         else
                                                         {
                                                             ClassLog.Log(
-                                                                "Block mined synced at: " + Program.ListOfBlock.Count +
+                                                                "Block mined synced at: " + ClassRemoteNodeSync.ListOfBlock.Count +
                                                                 "/" + ClassRemoteNodeSync.TotalBlockMined, 0, 2);
                                                         }
                                                     }
@@ -920,20 +920,20 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                         var blockLineSplit = blockSubString.Split(new[] { "#" }, StringSplitOptions.None);
                                         var blockIdTmp = long.Parse(blockLineSplit[0]);
 
-                                        if (!Program.ListOfBlock.ContainsKey(blockIdTmp - 1))
+                                        if (!ClassRemoteNodeSync.ListOfBlock.ContainsKey(blockIdTmp - 1))
                                         {
-                                            if (Program.ListOfBlockHash.GetBlockIdFromHash(blockLineSplit[1]) == -1)
+                                            if (ClassRemoteNodeSync.ListOfBlockHash.GetBlockIdFromHash(blockLineSplit[1]) == -1)
                                             {
                                                 try
                                                 {
-                                                    if (Program.ListOfBlockHash.InsertBlockHash(blockLineSplit[1], blockIdTmp - 1))
+                                                    if (ClassRemoteNodeSync.ListOfBlockHash.InsertBlockHash(blockLineSplit[1], blockIdTmp - 1))
                                                     {
-                                                        Program.ListOfBlock.Add(blockIdTmp - 1, blockSubString);
-                                                        if (Program.ListOfBlock.Count.ToString("F0") ==
+                                                        ClassRemoteNodeSync.ListOfBlock.Add(blockIdTmp - 1, blockSubString);
+                                                        if (ClassRemoteNodeSync.ListOfBlock.Count.ToString("F0") ==
                                                             ClassRemoteNodeSync.TotalBlockMined)
                                                         {
                                                             ClassLog.Log(
-                                                                "Block mined synced, " + Program.ListOfBlock.Count + "/" +
+                                                                "Block mined synced, " + ClassRemoteNodeSync.ListOfBlock.Count + "/" +
                                                                 ClassRemoteNodeSync.TotalBlockMined, 0, 1);
                                                             if (!await RemoteNodeObjectTcpClient.SendPacketToSeedNodeAsync(ClassRemoteNodeCommand.ClassRemoteNodeSendToSeedEnumeration.RemoteAskSchemaBlock, Program.Certificate, false, true))
                                                             {
@@ -949,7 +949,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                         else
                                                         {
                                                             ClassLog.Log(
-                                                                "Block mined synced at: " + Program.ListOfBlock.Count + "/" +
+                                                                "Block mined synced at: " + ClassRemoteNodeSync.ListOfBlock.Count + "/" +
                                                                 ClassRemoteNodeSync.TotalBlockMined, 0, 2);
                                                         }
                                                     }
@@ -1053,18 +1053,18 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                         ClassLog.Log("Transaction Received: " + transactionSubSplit[1], 2, 2);
 
 
-                                                        if (!Program.ListOfTransaction.ContainsKey(transactionIdInsert))
+                                                        if (!ClassRemoteNodeSync.ListOfTransaction.ContainsKey(transactionIdInsert))
                                                         {
-                                                            if (Program.ListOfTransactionHash.ContainsKey(dataTransactionSplit[5]) != 1)
+                                                            if (ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(dataTransactionSplit[5]) != 1)
                                                             {
                                                                 if (ClassRemoteNodeSortingTransactionPerWallet.AddNewTransactionSortedPerWallet(transactionSubSplit[1], transactionIdInsert))
                                                                 {
-                                                                    if (Program.ListOfTransaction.InsertTransaction(transactionIdInsert, transactionSubSplit[1], 0))
+                                                                    if (ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionIdInsert, transactionSubSplit[1], 0))
                                                                     {
 
-                                                                        if ((Program.ListOfTransaction.Count).ToString("F0") == ClassRemoteNodeSync.TotalTransaction)
+                                                                        if ((ClassRemoteNodeSync.ListOfTransaction.Count).ToString("F0") == ClassRemoteNodeSync.TotalTransaction)
                                                                         {
-                                                                            ClassLog.Log("Transaction synced, " + (Program.ListOfTransaction.Count) + "/" + ClassRemoteNodeSync.TotalTransaction, 0, 1);
+                                                                            ClassLog.Log("Transaction synced, " + (ClassRemoteNodeSync.ListOfTransaction.Count) + "/" + ClassRemoteNodeSync.TotalTransaction, 0, 1);
                                                                             if (!await RemoteNodeObjectTcpClient.SendPacketToSeedNodeAsync(ClassRemoteNodeCommand.ClassRemoteNodeSendToSeedEnumeration.RemoteAskSchemaTransaction, Program.Certificate, false, true))
                                                                             {
                                                                                 RemoteNodeObjectConnectionStatus = false;
@@ -1078,7 +1078,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                                         }
                                                                         else
                                                                         {
-                                                                            ClassLog.Log("Transaction synced at: " + (Program.ListOfTransaction.Count) + "/" + ClassRemoteNodeSync.TotalTransaction, 0, 2);
+                                                                            ClassLog.Log("Transaction synced at: " + (ClassRemoteNodeSync.ListOfTransaction.Count) + "/" + ClassRemoteNodeSync.TotalTransaction, 0, 2);
                                                                         }
                                                                     }
                                                                     else
@@ -1120,18 +1120,18 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                         ClassLog.Log("Transaction Received: " + transactionSubSplit[1], 2, 2);
 
 
-                                        if (!Program.ListOfTransaction.ContainsKey(transactionIdInsert))
+                                        if (!ClassRemoteNodeSync.ListOfTransaction.ContainsKey(transactionIdInsert))
                                         {
-                                            if (Program.ListOfTransactionHash.ContainsKey(dataTransactionSplit[5]) != 1)
+                                            if (ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(dataTransactionSplit[5]) != 1)
                                             {
                                                 if (ClassRemoteNodeSortingTransactionPerWallet.AddNewTransactionSortedPerWallet(transactionSubSplit[1], transactionIdInsert))
                                                 {
 
-                                                    if (Program.ListOfTransaction.InsertTransaction(transactionIdInsert, transactionSubSplit[1], 0))
+                                                    if (ClassRemoteNodeSync.ListOfTransaction.InsertTransaction(transactionIdInsert, transactionSubSplit[1], 0))
                                                     {
-                                                        if ((Program.ListOfTransaction.Count).ToString("F0") == ClassRemoteNodeSync.TotalTransaction)
+                                                        if ((ClassRemoteNodeSync.ListOfTransaction.Count).ToString("F0") == ClassRemoteNodeSync.TotalTransaction)
                                                         {
-                                                            ClassLog.Log("Transaction synced, " + (Program.ListOfTransaction.Count) + "/" + ClassRemoteNodeSync.TotalTransaction, 0, 1);
+                                                            ClassLog.Log("Transaction synced, " + (ClassRemoteNodeSync.ListOfTransaction.Count) + "/" + ClassRemoteNodeSync.TotalTransaction, 0, 1);
                                                             if (!await RemoteNodeObjectTcpClient.SendPacketToSeedNodeAsync(ClassRemoteNodeCommand.ClassRemoteNodeSendToSeedEnumeration.RemoteAskSchemaTransaction, Program.Certificate, false, true))
                                                             {
                                                                 RemoteNodeObjectConnectionStatus = false;
@@ -1145,7 +1145,7 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                                         }
                                                         else
                                                         {
-                                                            ClassLog.Log("Transaction synced at: " + (Program.ListOfTransaction.Count) + "/" + ClassRemoteNodeSync.TotalTransaction, 0, 2);
+                                                            ClassLog.Log("Transaction synced at: " + (ClassRemoteNodeSync.ListOfTransaction.Count) + "/" + ClassRemoteNodeSync.TotalTransaction, 0, 2);
 
                                                         }
 
@@ -1180,11 +1180,11 @@ namespace Xenophyte_RemoteNode.RemoteNode
                     case ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendCheckBlockPerId:
                         RemoteNodeObjectLastPacketReceived = DateTimeOffset.Now.ToUnixTimeSeconds();
                         if (int.TryParse(packetSplit[1], out var blockId))
-                            if (Program.ListOfBlock.Count > blockId)
+                            if (ClassRemoteNodeSync.ListOfBlock.Count > blockId)
                                 if (!await RemoteNodeObjectTcpClient
                                     .SendPacketToSeedNodeAsync(
                                         ClassRemoteNodeCommand.ClassRemoteNodeSendToSeedEnumeration
-                                            .RemoteCheckBlockPerId + ClassConnectorSetting.PacketContentSeperator + Program.ListOfBlock[blockId],
+                                            .RemoteCheckBlockPerId + ClassConnectorSetting.PacketContentSeperator + ClassRemoteNodeSync.ListOfBlock[blockId],
                                         Program.Certificate, false, true))
                                 {
                                     RemoteNodeObjectConnectionStatus = false;
@@ -1204,11 +1204,11 @@ namespace Xenophyte_RemoteNode.RemoteNode
                     case ClassRemoteNodeCommand.ClassRemoteNodeRecvFromSeedEnumeration.RemoteSendCheckTransactionPerId:
                         RemoteNodeObjectLastPacketReceived = DateTimeOffset.Now.ToUnixTimeSeconds();
                         if (long.TryParse(packetSplit[1], out var transactionId))
-                            if (Program.ListOfTransaction.Count > transactionId)
+                            if (ClassRemoteNodeSync.ListOfTransaction.Count > transactionId)
                                 if (!await RemoteNodeObjectTcpClient.SendPacketToSeedNodeAsync(
                                     ClassRemoteNodeCommand.ClassRemoteNodeSendToSeedEnumeration
                                         .RemoteCheckTransactionPerId + ClassConnectorSetting.PacketContentSeperator +
-                                    Program.ListOfTransaction.GetTransaction(transactionId, CancellationRemoteNodeObject), Program.Certificate, false,
+                                    ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionId, CancellationRemoteNodeObject), Program.Certificate, false,
                                     true))
                                 {
                                     RemoteNodeObjectConnectionStatus = false;
@@ -1313,9 +1313,9 @@ namespace Xenophyte_RemoteNode.RemoteNode
                                 ClassRemoteNodeSync.ImPublicNode = false;
                                 ClassLog.Log("Your remote node is not listed on the public list.", 1, 2);
 
-                                if (Program.ListOfBlock.Count ==
+                                if (ClassRemoteNodeSync.ListOfBlock.Count ==
                                     int.Parse(ClassRemoteNodeSync.TotalBlockMined) &&
-                                    Program.ListOfTransaction.Count ==
+                                    ClassRemoteNodeSync.ListOfTransaction.Count ==
                                     long.Parse(ClassRemoteNodeSync.TotalTransaction))
                                 {
                                     if (!await RemoteNodeObjectTcpClient.SendPacketToSeedNodeAsync(ClassRemoteNodeCommand.ClassRemoteNodeSendToSeedEnumeration.RemoteAskSchemaTransaction, Program.Certificate, false, true))

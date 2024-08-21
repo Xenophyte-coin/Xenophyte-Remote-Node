@@ -382,7 +382,7 @@ namespace Xenophyte_RemoteNode.Api
                     case ClassApiHttpRequestEnumeration.GetCoinTotalMined:
                         jsonResultObject = new ClassApiResultObject
                         {
-                            result = (Program.ListOfBlock.Count * ClassConnectorSetting.ConstantBlockReward)
+                            result = (ClassRemoteNodeSync.ListOfBlock.Count * ClassConnectorSetting.ConstantBlockReward)
                         };
 
                         resultJsonObject = JsonConvert.SerializeObject(jsonResultObject);
@@ -392,7 +392,7 @@ namespace Xenophyte_RemoteNode.Api
                     case ClassApiHttpRequestEnumeration.GetCoinBlockchainHeight:
                         jsonResultObject = new ClassApiResultObject
                         {
-                            result = (Program.ListOfBlock.Count + 1)
+                            result = (ClassRemoteNodeSync.ListOfBlock.Count + 1)
                         };
 
                         resultJsonObject = JsonConvert.SerializeObject(jsonResultObject);
@@ -402,7 +402,7 @@ namespace Xenophyte_RemoteNode.Api
                     case ClassApiHttpRequestEnumeration.GetCoinTotalBlockMined:
                         jsonResultObject = new ClassApiResultObject
                         {
-                            result = Program.ListOfBlock.Count
+                            result = ClassRemoteNodeSync.ListOfBlock.Count
                         };
 
                         resultJsonObject = JsonConvert.SerializeObject(jsonResultObject);
@@ -444,11 +444,11 @@ namespace Xenophyte_RemoteNode.Api
                         if (selectedIndex > 0)
                         {
                             selectedIndex -= 1;
-                            if (Program.ListOfBlock.Count - 1 >= selectedIndex)
+                            if (ClassRemoteNodeSync.ListOfBlock.Count - 1 >= selectedIndex)
                             {
-                                if (Program.ListOfBlock.ContainsKey(selectedIndex))
+                                if (ClassRemoteNodeSync.ListOfBlock.ContainsKey(selectedIndex))
                                 {
-                                    var splitBlock = Program.ListOfBlock[selectedIndex].Split(new[] { "#" }, StringSplitOptions.None);
+                                    var splitBlock = ClassRemoteNodeSync.ListOfBlock[selectedIndex].Split(new[] { "#" }, StringSplitOptions.None);
                                     var blockApiObject = new ClassApiBlockObject
                                     {
                                         block_id = long.Parse(splitBlock[0]),
@@ -483,11 +483,11 @@ namespace Xenophyte_RemoteNode.Api
                     case ClassApiHttpRequestEnumeration.GetCoinBlockPerHash:
                         if (selectedHash != string.Empty)
                         {
-                            long selectedBlockIndex = Program.ListOfBlockHash.GetBlockIdFromHash(selectedHash);
+                            long selectedBlockIndex = ClassRemoteNodeSync.ListOfBlockHash.GetBlockIdFromHash(selectedHash);
                             if (selectedBlockIndex != -1)
                             {
 
-                                var splitBlock = Program.ListOfBlock[selectedBlockIndex].Split(new[] { "#" }, StringSplitOptions.None);
+                                var splitBlock = ClassRemoteNodeSync.ListOfBlock[selectedBlockIndex].Split(new[] { "#" }, StringSplitOptions.None);
 
                                 var blockApiObject = new ClassApiBlockObject
                                 {
@@ -520,10 +520,10 @@ namespace Xenophyte_RemoteNode.Api
                         {
                             selectedIndex--;
 
-                            if (Program.ListOfTransaction.ContainsKey(selectedIndex))
+                            if (ClassRemoteNodeSync.ListOfTransaction.ContainsKey(selectedIndex))
                             {
 
-                                var transactionObject = await Program.ListOfTransaction.GetTransaction(selectedIndex, CancellationTokenSourceApi);
+                                var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(selectedIndex, CancellationTokenSourceApi);
 
 
                                 if (transactionObject.IsEmpty)
@@ -571,14 +571,14 @@ namespace Xenophyte_RemoteNode.Api
                             Debug.WriteLine("Search transaction by hash: "+selectedHash);
 #endif
 
-                            long transactionIndex = Program.ListOfTransactionHash.ContainsKey(selectedHash);
+                            long transactionIndex = ClassRemoteNodeSync.ListOfTransactionHash.ContainsKey(selectedHash);
                             if (transactionIndex >= 0)
                             {
 #if DEBUG
                             Debug.WriteLine("Search transaction ID found: "+transactionIndex+" by hash: "+selectedHash);
 #endif
 
-                                var transactionObject = await Program.ListOfTransaction.GetTransaction(transactionIndex, CancellationTokenSourceApi);
+                                var transactionObject = await ClassRemoteNodeSync.ListOfTransaction.GetTransaction(transactionIndex, CancellationTokenSourceApi);
 
 
                                 if (transactionObject.IsEmpty)
@@ -628,14 +628,14 @@ namespace Xenophyte_RemoteNode.Api
                             coin_max_supply = decimal.Parse(ClassRemoteNodeSync.CoinMaxSupply.Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
                             coin_circulating = decimal.Parse(ClassRemoteNodeSync.CoinCirculating.Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
                             coin_total_fee = decimal.Parse(ClassRemoteNodeSync.CurrentTotalFee.Replace(".", ","), NumberStyles.Currency, Program.GlobalCultureInfo),
-                            coin_total_mined = (Program.ListOfBlock.Count * ClassConnectorSetting.ConstantBlockReward),
-                            coin_total_block_mined = Program.ListOfBlock.Count,
-                            coin_blockchain_height = (Program.ListOfBlock.Count + 1),
+                            coin_total_mined = (ClassRemoteNodeSync.ListOfBlock.Count * ClassConnectorSetting.ConstantBlockReward),
+                            coin_total_block_mined = ClassRemoteNodeSync.ListOfBlock.Count,
+                            coin_blockchain_height = (ClassRemoteNodeSync.ListOfBlock.Count + 1),
                             coin_total_block_left = long.Parse(ClassRemoteNodeSync.CurrentBlockLeft),
                             coin_block_reward = ClassConnectorSetting.ConstantBlockReward,
                             coin_network_difficulty = decimal.Parse(ClassRemoteNodeSync.CurrentDifficulty.Replace(".", ","), NumberStyles.Any, Program.GlobalCultureInfo),
                             coin_network_hashrate = decimal.Parse(ClassRemoteNodeSync.CurrentHashrate.Replace(".", ","), NumberStyles.Any, Program.GlobalCultureInfo),
-                            coin_total_transaction = Program.ListOfTransaction.Count,
+                            coin_total_transaction = ClassRemoteNodeSync.ListOfTransaction.Count,
                             coin_network_total_transaction = long.Parse(ClassRemoteNodeSync.TotalTransaction)
                         };
 
