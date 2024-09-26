@@ -435,6 +435,7 @@ namespace Xenophyte_RemoteNode
             RemoteNodeSettingObject = new ClassRemoteNodeSetting
             {
                 wallet_address = RemoteNodeWalletAddress,
+                api_port = ClassConnectorSetting.RemoteNodePort,
                 api_http_port = ClassApiHttp.PersonalRemoteNodeHttpPort,
                 log_level = LogLevel,
                 write_log = false,
@@ -451,6 +452,7 @@ namespace Xenophyte_RemoteNode
                 RemoteNodeSettingObject.enable_api_http = true;
             else
                 RemoteNodeSettingObject.enable_api_http = false;
+
 
             var jsonRemoteNodeSettingObject = JsonConvert.SerializeObject(RemoteNodeSettingObject, Formatting.Indented);
             using (StreamWriter writer =
@@ -640,6 +642,7 @@ namespace Xenophyte_RemoteNode
 
                         ClassRemoteNodeSync.WantToBePublicNode = RemoteNodeSettingObject.enable_public_mode;
                         EnableApiHttp = RemoteNodeSettingObject.enable_api_http;
+                        ClassApi.ApiPort = RemoteNodeSettingObject.api_port;
                         ClassApiHttp.PersonalRemoteNodeHttpPort = RemoteNodeSettingObject.api_http_port;
                         LogLevel = RemoteNodeSettingObject.log_level;
                         EnableWriteLog = RemoteNodeSettingObject.write_log;

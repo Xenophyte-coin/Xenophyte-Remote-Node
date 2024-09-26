@@ -22,6 +22,7 @@ namespace Xenophyte_RemoteNode.Api
     /// </summary>
     public class ClassApi
     {
+        public static int ApiPort = ClassConnectorSetting.RemoteNodePort;
         private static CancellationTokenSource _cancellationTokenApi;
         private static TcpListener _tcpListenerApiReceiveConnection;
 
@@ -32,7 +33,7 @@ namespace Xenophyte_RemoteNode.Api
         {
             _cancellationTokenApi = new CancellationTokenSource();
 
-            _tcpListenerApiReceiveConnection = new TcpListener(IPAddress.Any, ClassConnectorSetting.RemoteNodePort);
+            _tcpListenerApiReceiveConnection = new TcpListener(IPAddress.Any, ApiPort);
             _tcpListenerApiReceiveConnection.Start();
 
             try
